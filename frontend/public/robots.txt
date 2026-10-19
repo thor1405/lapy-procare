@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /customer/
+Disallow: /technician/
+Disallow: /api/
+
+Sitemap: https://lapyprocare.com/sitemap.xml

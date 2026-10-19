@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # MongoDB Atlas or Local Database Container
+  mongo:
+    image: mongo:7.0
+    container_name: lapy_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: lapy_procare
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - lapy_net
+
+  # Express Node.js Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: lapy_backend
+    restart: always
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      MONGO_URI: mongodb://mongo:27017/lapy_procare
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-lapy_procare_super_secure_jwt_access_secret_key_2026_xyz987}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-lapy_procare_super_secure_jwt_refresh_secret_key_2026_abc123}
+      COOKIE_SECRET: ${COOKIE_SECRET:-lapy_procare_session_cookie_signature_secret_9999}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost}
+    depends_on:
+      - mongo
+    volumes:
+      - backend_uploads:/app/uploads
+    networks:
+      - lapy_net
+
+  # React Frontend with Nginx Reverse Proxy
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: lapy_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - lapy_net
+
+networks:
+  lapy_net:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  backend_uploads:
