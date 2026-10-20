@@ -1,53 +1,58 @@
 version: '3.8'
 
 services:
-  # MongoDB Atlas or Local Database Container
-  mongo:
-    image: mongo:7.0
-    container_name: lapy_mongo
-    restart: always
-    environment:
-      MONGO_INITDB_DATABASE: lapy_procare
-    volumes:
-      - mongo_data:/data/db
-    ports:
-      - "27017:27017"
-    networks:
-      - lapy_net
-
-  # Express Node.js Backend API
+  # ========================================================
+  # BACKEND SERVICE (Node.js LTS - ARM64 & x86_64 compatible)
+  # ========================================================
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: lapy_backend
-    restart: always
+    restart: unless-stopped
     environment:
-      PORT: 5000
       NODE_ENV: production
-      MONGO_URI: mongodb://mongo:27017/lapy_procare
+      PORT: 5000
+      # MongoDB Atlas Cloud Database Connection
+      MONGO_URI: ${MONGO_URI:-mongodb+srv://<username>:<password>@cluster0.mongodb.net/lapy_procare?retryWrites=true&w=majority}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-lapy_procare_super_secure_jwt_access_secret_key_2026_xyz987}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-lapy_procare_super_secure_jwt_refresh_secret_key_2026_abc123}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
       COOKIE_SECRET: ${COOKIE_SECRET:-lapy_procare_session_cookie_signature_secret_9999}
       CLIENT_URL: ${CLIENT_URL:-http://localhost}
-    depends_on:
-      - mongo
+      BUSINESS_NAME: "Lapy Procare"
+      BUSINESS_EMAIL: "lapyprocare@gmail.com"
+      BUSINESS_PHONE: "+917666104889"
+      BUSINESS_WHATSAPP: "917666104889"
+      BUSINESS_ADDRESS: "Near St. Joseph Engineering College, Vamanjoor, Mangaluru, Karnataka – 575028, India"
+      ENABLE_ONLINE_PAYMENTS: ${ENABLE_ONLINE_PAYMENTS:-false}
+      ENABLE_AI_ASSISTANT: ${ENABLE_AI_ASSISTANT:-true}
     volumes:
       - backend_uploads:/app/uploads
     networks:
       - lapy_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
-  # React Frontend with Nginx Reverse Proxy
+  # ========================================================
+  # FRONTEND SERVICE (React SPA + Nginx Reverse Proxy)
+  # ========================================================
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: lapy_frontend
-    restart: always
+    restart: unless-stopped
     ports:
       - "80:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - lapy_net
 
@@ -56,5 +61,5 @@ networks:
     driver: bridge
 
 volumes:
-  mongo_data:
   backend_uploads:
+    name: lapy_backend_uploads

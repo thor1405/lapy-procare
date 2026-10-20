@@ -100,17 +100,8 @@ export const AppRoutes = () => {
         <Route path="settings" element={<AdminSettings />} />
       </Route>
 
-      {/* Technician Portal Restricted to TECHNICIAN & ADMIN roles */}
-      <Route
-        path="/technician"
-        element={
-          <RoleRoute allowedRoles={['TECHNICIAN', 'ADMIN']}>
-            <TechLayout />
-          </RoleRoute>
-        }
-      >
-        <Route index element={<TechnicianDashboard />} />
-      </Route>
+      {/* Technician Portal Redirect to Admin Suite */}
+      <Route path="/technician" element={<Navigate to="/admin" replace />} />
     </Routes>
   );
 };

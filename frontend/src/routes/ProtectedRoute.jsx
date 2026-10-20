@@ -24,7 +24,6 @@ export const RoleRoute = ({ children, allowedRoles = [] }) => {
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
     // If wrong role, send to their authorized home
     if (user?.role === 'ADMIN') return <Navigate to="/admin" replace />;
-    if (user?.role === 'TECHNICIAN') return <Navigate to="/technician" replace />;
     return <Navigate to="/customer" replace />;
   }
 

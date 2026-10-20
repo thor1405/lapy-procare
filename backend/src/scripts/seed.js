@@ -39,9 +39,9 @@ const seedDatabase = async () => {
     // 2. Seed Users
     await User.deleteMany({ email: { $in: ['admin@lapyprocare.com', 'technician@lapyprocare.com', 'customer@gmail.com'] } });
 
-    // Administrator
+    // Administrator & Lead Technician (Single unified superuser)
     const adminUser = await User.create({
-      name: 'Lapy Procare Admin',
+      name: 'Lapy Procare Admin & Lead Tech',
       email: 'admin@lapyprocare.com',
       phone: '+91 7666104889',
       password: 'Admin@Lapy2026!',
@@ -54,22 +54,12 @@ const seedDatabase = async () => {
       },
     });
 
-    // Technician
-    const techUser = await User.create({
-      name: 'Rohan Shetty (Senior Tech)',
-      email: 'technician@lapyprocare.com',
-      phone: '+91 9880123456',
-      password: 'Tech@Lapy2026!',
-      role: ROLES.TECHNICIAN,
-      isVerified: true,
-    });
-
-    await TechnicianProfile.deleteMany({ user: techUser._id });
+    await TechnicianProfile.deleteMany({});
     await TechnicianProfile.create({
-      user: techUser._id,
-      specialization: ['Chip-Level Motherboard Repair', 'Display & Hinge Overhaul', 'Thermal Diagnostics'],
-      experienceYears: 6,
-      bio: 'Lead certified hardware technician with 6+ years specializing in board-level micro-soldering and custom rig architecture.',
+      user: adminUser._id,
+      specialization: ['Chip-Level Motherboard Repair', 'Display & Hinge Overhaul', 'Thermal Diagnostics', 'Custom PC Architecture'],
+      experienceYears: 8,
+      bio: 'Owner, Lead Engineer & Master Hardware Technician at Lapy Procare Vamanjoor.',
     });
 
     // Customer
@@ -86,7 +76,7 @@ const seedDatabase = async () => {
         postalCode: '575003',
       },
     });
-    console.log('✔ Users seeded (Admin, Technician, Customer).');
+    console.log('✔ Users seeded (Admin & Lead Tech, Customer).');
 
     // 3. Seed Services
     await Service.deleteMany({});
@@ -505,9 +495,8 @@ const seedDatabase = async () => {
 
     console.log('\n=======================================================');
     console.log(' DATABASE SEEDING COMPLETED SUCCESSFULLY!             ');
-    console.log(' Admin Login: admin@lapyprocare.com / Admin@Lapy2026!  ');
-    console.log(' Tech Login:  technician@lapyprocare.com / Tech@Lapy2026!');
-    console.log(' Customer:    customer@gmail.com / Customer@123        ');
+    console.log(' Admin & Lead Tech: admin@lapyprocare.com / Admin@Lapy2026!');
+    console.log(' Customer:          customer@gmail.com / Customer@123');
     console.log('=======================================================');
 
     process.exit(0);

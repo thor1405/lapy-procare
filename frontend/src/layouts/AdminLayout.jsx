@@ -33,7 +33,6 @@ export const AdminLayout = () => {
     { name: 'Quotations', path: '/admin/quotations', icon: FileCheck2 },
     { name: 'Invoices & Billing', path: '/admin/invoices', icon: Receipt },
     { name: 'Inventory & Parts', path: '/admin/inventory', icon: Boxes },
-    { name: 'Technicians', path: '/admin/technicians', icon: Users2 },
     { name: 'Customer Directory', path: '/admin/customers', icon: Contact },
     { name: 'Website Inquiries', path: '/admin/inquiries', icon: MessageSquare },
     { name: 'Business Settings', path: '/admin/settings', icon: Settings },

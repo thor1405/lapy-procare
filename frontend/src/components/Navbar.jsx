@@ -35,7 +35,6 @@ export const Navbar = () => {
   const getPortalLink = () => {
     if (!user) return '/customer';
     if (user.role === 'ADMIN') return '/admin';
-    if (user.role === 'TECHNICIAN') return '/technician';
     return '/customer';
   };
 
@@ -85,8 +84,6 @@ export const Navbar = () => {
                 <Button variant="secondary" size="sm" icon={User}>
                   {user?.role === 'ADMIN'
                     ? 'Admin Suite'
-                    : user?.role === 'TECHNICIAN'
-                    ? 'Tech Workspace'
                     : 'Customer Portal'}
                 </Button>
               </Link>

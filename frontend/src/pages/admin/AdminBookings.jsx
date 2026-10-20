@@ -213,7 +213,7 @@ export const AdminBookings = () => {
                   <th className="py-3 px-4 font-semibold">Customer & Contact</th>
                   <th className="py-3 px-4 font-semibold">Device</th>
                   <th className="py-3 px-4 font-semibold">Status</th>
-                  <th className="py-3 px-4 font-semibold">Assigned Tech</th>
+                  <th className="py-3 px-4 font-semibold">Service Lead</th>
                   <th className="py-3 px-4 font-semibold">Appointment</th>
                   <th className="py-3 px-4 font-semibold text-right">Actions</th>
                 </tr>
@@ -238,11 +238,10 @@ export const AdminBookings = () => {
                       <Badge status={b.status} />
                     </td>
                     <td className="py-3.5 px-4 text-[#475569]">
-                      {b.assignedTechnician ? (
-                        <span className="text-teal-700 font-semibold">{b.assignedTechnician.name}</span>
-                      ) : (
-                        <span className="text-slate-400 italic">Unassigned</span>
-                      )}
+                      <span className="text-teal-700 font-semibold flex items-center gap-1.5 text-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+                        <span>{b.assignedTechnician?.name || 'Admin (You)'}</span>
+                      </span>
                     </td>
                     <td className="py-3.5 px-4 text-[#64748B]">
                       {new Date(b.appointment?.date).toLocaleDateString('en-IN')}
@@ -258,23 +257,10 @@ export const AdminBookings = () => {
                             setStatusNote('');
                             setStatusModalOpen(true);
                           }}
-                          title="Update Status"
+                          title="Update Status & Stage"
                           className="p-1.5 text-[#4F46E5] hover:bg-indigo-50"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedBooking(b);
-                            setSelectedTechId(b.assignedTechnician?._id || '');
-                            setAssignModalOpen(true);
-                          }}
-                          title="Assign Technician"
-                          className="p-1.5 text-blue-600 hover:bg-blue-50"
-                        >
-                          <UserCheck className="w-3.5 h-3.5" />
                         </Button>
                         <Button
                           variant="ghost"

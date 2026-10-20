@@ -29,8 +29,6 @@ export const Login = () => {
         navigate(redirectPath);
       } else if (res.user.role === 'ADMIN') {
         navigate('/admin');
-      } else if (res.user.role === 'TECHNICIAN') {
-        navigate('/technician');
       } else {
         navigate('/customer');
       }
@@ -124,17 +122,7 @@ export const Login = () => {
                 }}
                 className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 font-medium transition-colors"
               >
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('technician@lapyprocare.com');
-                  setPassword('Tech@Lapy2026!');
-                }}
-                className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 font-medium transition-colors"
-              >
-                Technician
+                Admin & Lead Tech
               </button>
               <button
                 type="button"

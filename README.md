@@ -67,10 +67,7 @@ Customer Registers Account
 Schedules Repair Booking (Validates Slot Capacity & Generates LPC-YYYY-XXXXXX)
           │
           ▼
-Admin Dispatches Ticket to Field Technician
-          │
-          ▼
-Technician Performs Diagnosis & Logs Component Faults
+Admin & Lead Tech Performs Diagnosis & Logs Component Faults
           │
           ▼
 Admin Issues Official Itemized Quotation
@@ -136,8 +133,7 @@ npm run seed
 ```
 
 **Default Seed Credentials:**
-- **Admin:** `admin@lapyprocare.com` | `Admin@Lapy2026!`
-- **Technician:** `technician@lapyprocare.com` | `Tech@Lapy2026!`
+- **Admin & Lead Tech:** `admin@lapyprocare.com` | `Admin@Lapy2026!`
 - **Customer:** `customer@gmail.com` | `Customer@123`
 
 ### 4. Run Automated Tests
