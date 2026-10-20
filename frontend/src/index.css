@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
     @apply bg-[#F8FAFC] text-[#475569] antialiased selection:bg-indigo-100 selection:text-indigo-800;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -10,6 +17,10 @@
 
   h1, h2, h3, h4, h5, h6 {
     @apply text-[#111827];
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -36,4 +47,56 @@
   background: linear-gradient(100deg, #4F46E5 0%, #3B82F6 52%, #14B8A6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Smooth Page Enter Fade */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: pageEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Smooth Gentle Floating Keyframes for Hardware Pills */
+@keyframes floatGentle1 {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes floatGentle2 {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+.animate-float-1 {
+  animation: floatGentle1 4.5s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: floatGentle2 5s ease-in-out infinite 0.75s;
+}
+
+/* Smooth Card Hover Utility */
+.hover-lift {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
 }

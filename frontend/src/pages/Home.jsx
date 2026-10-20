@@ -207,7 +207,7 @@ export const Home = () => {
               </div>
 
               {/* FLOATING UI ELEMENT 1: Device Diagnosis (Top Left) */}
-              <div className="absolute -top-6 -left-6 sm:-left-8 bg-white border border-[#E2E8F0] rounded-2xl p-3.5 shadow-float flex items-center gap-3 z-20 animate-in fade-in slide-in-from-top-4 duration-500 hidden sm:flex">
+              <div className="absolute -top-6 -left-6 sm:-left-8 bg-white border border-[#E2E8F0] rounded-2xl p-3.5 shadow-float flex items-center gap-3 z-20 animate-float-1 hidden sm:flex">
                 <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                   <Activity className="w-4 h-4" />
                 </div>
@@ -220,7 +220,7 @@ export const Home = () => {
               </div>
 
               {/* FLOATING UI ELEMENT 2: Repair in Progress (Top Right) */}
-              <div className="absolute -top-4 -right-4 sm:-right-6 bg-white border border-[#E2E8F0] rounded-2xl p-3.5 shadow-float flex items-center gap-3 z-20 animate-in fade-in slide-in-from-right-4 duration-500 hidden sm:flex">
+              <div className="absolute -top-4 -right-4 sm:-right-6 bg-white border border-[#E2E8F0] rounded-2xl p-3.5 shadow-float flex items-center gap-3 z-20 animate-float-2 hidden sm:flex">
                 <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                   <Wrench className="w-4 h-4" />
                 </div>
@@ -233,7 +233,7 @@ export const Home = () => {
               </div>
 
               {/* FLOATING UI ELEMENT 3: Service Completed (Bottom Left) */}
-              <div className="absolute -bottom-6 -left-4 sm:-left-6 bg-white border border-[#E2E8F0] rounded-2xl p-3.5 shadow-float flex items-center gap-3 z-20 animate-in fade-in slide-in-from-bottom-4 duration-500 hidden sm:flex">
+              <div className="absolute -bottom-6 -left-4 sm:-left-6 bg-white border border-[#E2E8F0] rounded-2xl p-3.5 shadow-float flex items-center gap-3 z-20 animate-float-2 hidden sm:flex">
                 <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
                   <Check className="w-4 h-4 stroke-[3]" />
                 </div>
@@ -246,7 +246,7 @@ export const Home = () => {
               </div>
 
               {/* FLOATING UI ELEMENT 4: Verified Technician (Bottom Right) */}
-              <div className="absolute -bottom-5 -right-4 sm:-right-6 bg-white border border-[#E2E8F0] rounded-2xl p-3.5 shadow-float flex items-center gap-3 z-20 animate-in fade-in slide-in-from-bottom-4 duration-500 hidden sm:flex">
+              <div className="absolute -bottom-5 -right-4 sm:-right-6 bg-white border border-[#E2E8F0] rounded-2xl p-3.5 shadow-float flex items-center gap-3 z-20 animate-float-1 hidden sm:flex">
                 <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
                   <UserCheck className="w-4 h-4" />
                 </div>
@@ -364,13 +364,13 @@ export const Home = () => {
                 </div>
 
                 <div className="pt-4 border-t border-[#E2E8F0] flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] text-[#64748B] uppercase block">Starting Base</span>
-                    <span className="text-base font-extrabold text-[#111827]">₹{service.startingPrice}</span>
+                  <div className="flex items-center gap-1.5 text-xs text-teal-700 font-medium bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                    <span>Free Diagnosis</span>
                   </div>
                   <Link to={`/customer/book?service=${encodeURIComponent(service.title)}`}>
-                    <Button size="sm" variant="outline" className="text-xs">
-                      Book Now
+                    <Button size="sm" className="text-xs font-semibold" icon={ArrowRight}>
+                      Book Service
                     </Button>
                   </Link>
                 </div>

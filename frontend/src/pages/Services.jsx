@@ -18,6 +18,7 @@ import {
   Search,
   CheckCircle2,
   Clock,
+  ArrowRight,
 } from 'lucide-react';
 
 const iconMap = {
@@ -186,12 +187,14 @@ export const Services = () => {
                 </div>
 
                 <div className="pt-4 border-t border-[#E2E8F0] flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] text-[#64748B] uppercase block">Starting Base</span>
-                    <span className="text-base font-extrabold text-[#111827]">₹{service.startingPrice}</span>
+                  <div className="flex items-center gap-1.5 text-xs text-teal-700 font-medium bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                    <span>Free Diagnosis</span>
                   </div>
                   <Link to={`/customer/book?service=${encodeURIComponent(service.title)}`}>
-                    <Button size="sm">Book Service</Button>
+                    <Button size="sm" className="font-semibold" icon={ArrowRight}>
+                      Book Service
+                    </Button>
                   </Link>
                 </div>
               </Card>

@@ -1,11 +1,13 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { WhatsAppFloating } from '../components/WhatsAppFloating';
 import { Toaster } from 'sonner';
 
 export const MainLayout = () => {
+  const location = useLocation();
+
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-[#475569] font-sans selection:bg-indigo-100 selection:text-indigo-800 relative">
       {/* Subtle ambient lighting glows */}
@@ -14,7 +16,9 @@ export const MainLayout = () => {
 
       <Navbar />
       <main className="flex-1">
-        <Outlet />
+        <div key={location.pathname} className="animate-page-enter">
+          <Outlet />
+        </div>
       </main>
       <Footer />
       <WhatsAppFloating />
