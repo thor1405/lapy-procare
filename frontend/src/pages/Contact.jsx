@@ -21,7 +21,7 @@ const FAQS = [
   },
   {
     q: 'Do you charge a diagnostic fee if I decide not to proceed with the repair?',
-    a: 'General initial checkups are complimentary. In-depth chip-level logic board diagnostics have a modest nominal fee of ₹299, which is 100% waived upon approving the repair.',
+    a: 'General initial checkups and evaluations are completely complimentary. You will receive an itemized diagnostic report and quotation prior to any repair commencement.',
   },
   {
     q: 'Are replacement screens, batteries, and keyboards original OEM?',

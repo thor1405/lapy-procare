@@ -435,30 +435,30 @@ export const Home = () => {
       </section>
 
       {/* ========================================================
-          SECTION 5 — CUSTOM PC CONFIGURATOR BANNER
+          SECTION 5 — CUSTOM WORKSTATION ENGINEERING BANNER
          ======================================================== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative rounded-3xl p-8 sm:p-12 bg-gradient-to-r from-indigo-50 via-white to-teal-50 border border-indigo-100 overflow-hidden shadow-card">
           <div className="max-w-2xl space-y-5">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-indigo-700 text-xs font-bold border border-indigo-100 shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Interactive Custom PC Builder</span>
+              <span>Bespoke Hardware Engineering</span>
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#111827] font-['Sora']">
-              Configure Your Dream Gaming Rig or Workstation
+              High-Performance Custom Workstations & Precision Rigs
             </h2>
             <p className="text-sm text-[#475569] leading-relaxed">
-              Build high-performance gaming rigs, 3D architectural rendering workstations, and coding battle stations. Our configurator checks socket, DDR standard, and PSU load automatically.
+              Engineered for AI deep compute, 3D architectural rendering, 8K cinema color grading, and competitive esports. Every build undergoes surgical clean-bench assembly, 48-hour continuous burn-in stress testing, and zero-bloatware OS tuning in Mangaluru.
             </p>
             <div className="pt-2 flex flex-wrap gap-4">
               <Link to="/pc-builder">
                 <Button size="lg" icon={Cpu}>
-                  Launch Custom PC Builder
+                  Explore Custom Workstations
                 </Button>
               </Link>
               <Link to="/contact">
                 <Button variant="secondary" size="lg">
-                  Consult Rig Specialist
+                  Consult Hardware Engineer
                 </Button>
               </Link>
             </div>
