@@ -24,12 +24,11 @@ const httpServer = http.createServer(app);
 // Initialize Socket.IO
 initSocket(httpServer);
 
-// Start Server after connecting to MongoDB
+// Start Server & Connect to Database
 const startServer = async () => {
   try {
-    await connectDB();
-
-    const server = httpServer.listen(PORT, () => {
+    // 1. Start HTTP Server first so container is immediately healthy and responsive
+    httpServer.listen(PORT, () => {
       logger.info(`=======================================================`);
       logger.info(`  LAPY PROCARE BACKEND SERVER RUNNING ON PORT ${PORT} `);
       logger.info(`  Mode: ${process.env.NODE_ENV || 'development'}         `);
@@ -37,8 +36,12 @@ const startServer = async () => {
       logger.info(`=======================================================`);
     });
 
+    // 2. Connect to MongoDB asynchronously (with auto-retry if network is pending)
+    connectDB().catch((err) => {
+      logger.warn(`Initial database connection attempt deferred: ${err.message}`);
+    });
   } catch (error) {
-    logger.error(`Failed to start server: ${error.message}`);
+    logger.error(`Failed to start HTTP server: ${error.message}`);
     process.exit(1);
   }
 };

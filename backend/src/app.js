@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import { globalLimiter } from './middleware/rateLimiter.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { errorResponse, successResponse } from './utils/apiResponse.js';
+import { getDBStatus } from './config/db.js';
 
 // Route imports
 import authRoutes from './routes/authRoutes.js';
@@ -73,19 +74,25 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health Check
 app.get('/health', (req, res) => {
+  const dbStatus = getDBStatus();
   return successResponse(res, 'Lapy Procare API is healthy', {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
     service: 'Lapy Procare Core API',
+    database: dbStatus.isConnected ? 'connected' : 'connecting_or_error',
+    databaseDetails: dbStatus.error ? dbStatus.error : 'healthy',
     version: '1.0.0',
   });
 });
 
 app.get('/api/v1/health', (req, res) => {
+  const dbStatus = getDBStatus();
   return successResponse(res, 'Lapy Procare API v1 is healthy', {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
     service: 'Lapy Procare Core API v1',
+    database: dbStatus.isConnected ? 'connected' : 'connecting_or_error',
+    databaseDetails: dbStatus.error ? dbStatus.error : 'healthy',
   });
 });
 

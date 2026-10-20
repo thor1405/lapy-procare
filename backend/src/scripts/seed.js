@@ -14,6 +14,11 @@ dotenv.config();
 const seedDatabase = async () => {
   try {
     const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/lapy_procare';
+    if (mongoURI.includes('@cluster0.mongodb.net')) {
+      console.error('\n❌ ERROR: Your MONGO_URI contains the placeholder "@cluster0.mongodb.net"!');
+      console.error('In MongoDB Atlas, clusters have a unique subdomain like "@cluster0.abcde.mongodb.net".');
+      console.error('Please copy your exact connection URI from MongoDB Atlas -> Connect -> Drivers.\n');
+    }
     await mongoose.connect(mongoURI);
     console.log('Connected to MongoDB for database seeding...');
 

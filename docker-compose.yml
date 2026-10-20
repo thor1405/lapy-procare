@@ -3,6 +3,7 @@ version: '3.8'
 services:
   # ========================================================
   # BACKEND SERVICE (Node.js LTS - ARM64 & x86_64 compatible)
+  # Default Host Port: 5065 (Configurable via BACKEND_PORT in .env)
   # ========================================================
   backend:
     build:
@@ -11,18 +12,18 @@ services:
     container_name: lapy_backend
     restart: unless-stopped
     ports:
-      - "${BACKEND_PORT:-5001}:5001"
+      - "${BACKEND_PORT:-5065}:5001"
     environment:
       NODE_ENV: production
       PORT: 5001
       # MongoDB Atlas Cloud Database Connection
-      MONGO_URI: ${MONGO_URI:-mongodb+srv://<username>:<password>@cluster0.mongodb.net/lapy_procare?retryWrites=true&w=majority}
+      MONGO_URI: ${MONGO_URI:-mongodb+srv://<username>:<password>@cluster0.xxxx.mongodb.net/lapy_procare?retryWrites=true&w=majority}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-lapy_procare_super_secure_jwt_access_secret_key_2026_xyz987}
       JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-lapy_procare_super_secure_jwt_refresh_secret_key_2026_abc123}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
       COOKIE_SECRET: ${COOKIE_SECRET:-lapy_procare_session_cookie_signature_secret_9999}
-      CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:3555}
       BUSINESS_NAME: "Lapy Procare"
       BUSINESS_EMAIL: "lapyprocare@gmail.com"
       BUSINESS_PHONE: "+917666104889"
@@ -36,14 +37,14 @@ services:
       - lapy_net
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:5001/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   # ========================================================
   # FRONTEND SERVICE (React SPA + Nginx Reverse Proxy)
-  # Default Host Port: 3000 (Configurable via FRONTEND_PORT in .env)
+  # Default Host Port: 3555 (Configurable via FRONTEND_PORT in .env)
   # ========================================================
   frontend:
     build:
@@ -52,7 +53,7 @@ services:
     container_name: lapy_frontend
     restart: unless-stopped
     ports:
-      - "${FRONTEND_PORT:-3000}:80"
+      - "${FRONTEND_PORT:-3555}:80"
     depends_on:
       backend:
         condition: service_healthy
