@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { logger } from './logger.js';
+import { autoSeedIfEmpty } from '../scripts/seed.js';
 
 let isConnected = false;
 let connectionError = null;
@@ -24,6 +25,10 @@ export const connectDB = async () => {
     logger.info(
       `✔ MongoDB Connected [${isAtlas ? 'MongoDB Atlas' : 'Local MongoDB'}]: ${conn.connection.host}/${conn.connection.name}`
     );
+
+    // Auto-seed initial Admin & platform catalog if database is empty
+    await autoSeedIfEmpty();
+
     return conn;
   } catch (error) {
     isConnected = false;
