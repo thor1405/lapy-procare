@@ -114,10 +114,10 @@ npm install
 Create `backend/.env` (see `backend/.env.example` for full options):
 
 ```env
-PORT=5000
+PORT=5001
 NODE_ENV=development
-MONGO_URI=mongodb://127.0.0.1:27017/lapy_procare
-CLIENT_URL=http://localhost:5173
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/lapy_procare?retryWrites=true&w=majority
+CLIENT_URL=http://localhost:3000
 JWT_ACCESS_SECRET=lapy_procare_super_secure_jwt_access_secret_key_2026_xyz987
 JWT_REFRESH_SECRET=lapy_procare_super_secure_jwt_refresh_secret_key_2026_abc123
 COOKIE_SECRET=lapy_procare_session_cookie_signature_secret_9999
@@ -146,7 +146,7 @@ npm test
 ### 5. Start the Stack
 
 ```bash
-# Terminal 1: Start Backend (Port 5000)
+# Terminal 1: Start Backend (Port 5001)
 cd backend
 npm run dev
 

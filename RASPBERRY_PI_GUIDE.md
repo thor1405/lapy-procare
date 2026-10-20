@@ -19,7 +19,7 @@ By utilizing **MongoDB Atlas** in the cloud rather than running a heavy local Mo
          ┌─────────────────────────────────────────────────┐
          │            Raspberry Pi 5 (ARM64)               │
          │                                                 │
-         │   Port 80 (HTTP)                                │
+         │   Port 3000 (HTTP - Web Application)            │
          │   ┌─────────────────────────────────────────┐   │
          │   │  lapy_frontend (Nginx Alpine)           │   │
          │   │  • Serves React Single Page Application │   │
@@ -27,10 +27,10 @@ By utilizing **MongoDB Atlas** in the cloud rather than running a heavy local Mo
          │   │  • Proxies /api/ and /socket.io/ ───────┼─┐ │
          │   └─────────────────────────────────────────┘ │ │
          │                                               │ │
-         │   Internal Docker Bridge (lapy_net)           │ │
+         │   Port 5001 (HTTP - Backend API & Sockets)    │ │
          │   ┌─────────────────────────────────────────┐ │ │
          │   │  lapy_backend (Node.js 20 Alpine) ◄─────┼─┘ │
-         │   │  • Express REST API                     │   │
+         │   │  • Express REST API (Port 5001)         │   │
          │   │  • JWT Auth & HTTP-only Cookies         │   │
          │   │  • PDF Invoice & Quotation Generation   │   │
          │   └────────────────────┬────────────────────┘   │
@@ -116,10 +116,12 @@ nano .env
 Set the following critical variables in `.env`:
 
 ```env
-# Server
-PORT=5000
+# Host Ports Configuration (Different from 80 and 5000)
+FRONTEND_PORT=3000
+BACKEND_PORT=5001
+PORT=5001
 NODE_ENV=production
-CLIENT_URL=http://<YOUR_RASPBERRY_PI_IP>
+CLIENT_URL=http://<YOUR_RASPBERRY_PI_IP>:3000
 
 # Paste your MongoDB Atlas URI here:
 MONGO_URI=mongodb+srv://lapy_admin:YourPassword@cluster0.xxxx.mongodb.net/lapy_procare?retryWrites=true&w=majority
@@ -142,8 +144,8 @@ docker compose up -d --build
 ```
 
 Docker will build:
-1. `lapy_backend` (Node.js 20 LTS ARM64 native)
-2. `lapy_frontend` (React production bundle built and served via Nginx on port 80)
+1. `lapy_backend` on host port **5001** (Node.js 20 LTS ARM64 native)
+2. `lapy_frontend` on host port **3000** (React production bundle built and served via Nginx)
 
 Verify both containers are running and healthy:
 ```bash
@@ -151,8 +153,8 @@ docker compose ps
 ```
 
 You should see:
-- `lapy_backend` — `Up (healthy)`
-- `lapy_frontend` — `Up 80->80/tcp`
+- `lapy_backend` — `Up (healthy) 0.0.0.0:5001->5001/tcp`
+- `lapy_frontend` — `Up 0.0.0.0:3000->80/tcp`
 
 ---
 
@@ -179,9 +181,10 @@ This provisions:
 ## 7. Step 6: Access LAPY PROCARE
 
 Open your web browser from any phone, laptop, or tablet connected to your local network:
-- **Web Application:** `http://<YOUR_RASPBERRY_PI_IP>`
-- **Admin Suite:** `http://<YOUR_RASPBERRY_PI_IP>/login` → Sign in with `admin@lapyprocare.com`
-- **Customer Portal:** `http://<YOUR_RASPBERRY_PI_IP>/login` → Sign in with `customer@gmail.com`
+- **Web Application:** `http://<YOUR_RASPBERRY_PI_IP>:3000`
+- **Admin Suite:** `http://<YOUR_RASPBERRY_PI_IP>:3000/login` → Sign in with `admin@lapyprocare.com`
+- **Customer Portal:** `http://<YOUR_RASPBERRY_PI_IP>:3000/login` → Sign in with `customer@gmail.com`
+- **Direct Backend API / Health:** `http://<YOUR_RASPBERRY_PI_IP>:5001/health`
 
 ---
 
