@@ -101,16 +101,16 @@ Describe your computer's symptoms (e.g., liquid spill, black screen, thermal ove
       </div>
 
       {/* Main Chat Interface */}
-      <Card className="p-0 border-[#E2E8F0] bg-white rounded-3xl overflow-hidden shadow-card flex flex-col h-[600px]">
+      <Card className="p-0 border-[#E2E8F0] bg-white rounded-3xl overflow-hidden shadow-card flex flex-col h-[520px] sm:h-[600px]">
         {/* Chat Header Bar */}
-        <div className="px-6 py-4 bg-slate-50 border-b border-[#E2E8F0] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-sm">
-              <Bot className="w-5 h-5" />
+        <div className="px-4 sm:px-6 py-3.5 bg-slate-50 border-b border-[#E2E8F0] flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
+              <Bot className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-[#111827]">Lapy Procare Diagnostic AI</h3>
-              <p className="text-[11px] text-teal-600 font-medium flex items-center gap-1">
+              <h3 className="text-xs sm:text-sm font-bold text-[#111827]">Lapy Procare Diagnostic AI</h3>
+              <p className="text-[10px] sm:text-[11px] text-teal-600 font-medium flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span> Online Consultation
               </p>
             </div>
@@ -125,7 +125,7 @@ Describe your computer's symptoms (e.g., liquid spill, black screen, thermal ove
         </div>
 
         {/* Chat History Area */}
-        <div className="flex-1 p-6 overflow-y-auto space-y-4">
+        <div className="flex-1 p-3.5 sm:p-6 overflow-y-auto space-y-3 sm:space-y-4">
           {messages.map((msg, idx) => (
             <div
               key={idx}

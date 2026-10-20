@@ -203,7 +203,8 @@ export const Tracking = () => {
               </div>
             ) : (
               <div className="relative">
-                <div className="overflow-x-auto pb-4 pt-2 -mx-2 px-2">
+                {/* Desktop Straight-Line Horizontal Track (md:block) */}
+                <div className="hidden md:block overflow-x-auto pb-4 pt-2 -mx-2 px-2">
                   <div className="min-w-[920px] flex items-start justify-between">
                     {ALL_STAGES.map((stage, idx) => {
                       const currentIdx = getCurrentStageIndex(trackingData.status);
@@ -264,6 +265,64 @@ export const Tracking = () => {
                       );
                     })}
                   </div>
+                </div>
+
+                {/* Mobile Vertical Stepper (<768px) */}
+                <div className="md:hidden space-y-4 py-2">
+                  {ALL_STAGES.map((stage, idx) => {
+                    const currentIdx = getCurrentStageIndex(trackingData.status);
+                    const isCompleted = idx <= currentIdx;
+                    const isCurrent = idx === currentIdx;
+                    const isLast = idx === ALL_STAGES.length - 1;
+
+                    return (
+                      <div key={stage} className="flex items-start gap-3.5 relative">
+                        {/* Vertical line indicator */}
+                        {!isLast && (
+                          <div
+                            className={`absolute left-4 top-8 w-0.5 h-full -ml-[1px] ${
+                              idx < currentIdx ? 'bg-teal-600' : 'bg-slate-200'
+                            }`}
+                          />
+                        )}
+
+                        {/* Stage circle */}
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all z-10 ${
+                            isCurrent
+                              ? 'bg-[#4F46E5] text-white ring-4 ring-indigo-100 shadow-sm'
+                              : isCompleted
+                              ? 'bg-teal-600 text-white'
+                              : 'bg-white text-slate-400 border-2 border-slate-200'
+                          }`}
+                        >
+                          {isCompleted ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : idx + 1}
+                        </div>
+
+                        {/* Stage info */}
+                        <div className="pt-1">
+                          <p
+                            className={`text-xs font-semibold leading-tight ${
+                              isCurrent
+                                ? 'text-[#4F46E5] font-bold'
+                                : isCompleted
+                                ? 'text-[#111827]'
+                                : 'text-[#64748B]'
+                            }`}
+                          >
+                            {stage}
+                          </p>
+                          <span className="text-[10px] text-[#64748B] block mt-0.5">
+                            {isCurrent
+                              ? 'Current Active Stage'
+                              : isCompleted
+                              ? 'Completed'
+                              : 'Pending'}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

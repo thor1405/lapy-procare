@@ -162,48 +162,81 @@ export const CustomerDashboard = () => {
             </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-[#E2E8F0] text-[#64748B]">
-                  <th className="pb-3 font-semibold">Ticket ID</th>
-                  <th className="pb-3 font-semibold">Device</th>
-                  <th className="pb-3 font-semibold">Problem</th>
-                  <th className="pb-3 font-semibold">Status</th>
-                  <th className="pb-3 font-semibold">Appointment</th>
-                  <th className="pb-3 font-semibold text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E2E8F0]">
-                {repairs.map((repair) => (
-                  <tr key={repair._id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 font-mono font-bold text-[#4F46E5]">
-                      {repair.ticketId}
-                    </td>
-                    <td className="py-3 text-[#111827] font-semibold">
+          <>
+            {/* Mobile Cards (< md) */}
+            <div className="md:hidden divide-y divide-[#E2E8F0]">
+              {repairs.map((repair) => (
+                <div key={repair._id} className="py-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-sm font-bold text-[#4F46E5]">{repair.ticketId}</span>
+                    <Badge status={repair.status} />
+                  </div>
+
+                  <div className="text-xs space-y-1">
+                    <div className="font-semibold text-[#111827]">
                       {repair.device?.brand} {repair.device?.model}
-                    </td>
-                    <td className="py-3 text-[#475569] max-w-xs truncate">
-                      {repair.problem?.category}
-                    </td>
-                    <td className="py-3">
-                      <Badge status={repair.status} />
-                    </td>
-                    <td className="py-3 text-[#64748B]">
-                      {new Date(repair.appointment?.date).toLocaleDateString('en-IN')}
-                    </td>
-                    <td className="py-3 text-right">
-                      <Link to={`/track?ticketId=${repair.ticketId}`}>
-                        <Button variant="ghost" size="sm" className="text-xs text-[#4F46E5] hover:bg-indigo-50 font-semibold">
-                          Track Live
-                        </Button>
-                      </Link>
-                    </td>
+                    </div>
+                    <div className="text-[#64748B] flex items-center justify-between">
+                      <span>{repair.problem?.category}</span>
+                      <span>{new Date(repair.appointment?.date).toLocaleDateString('en-IN')}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-1">
+                    <Link to={`/track?ticketId=${repair.ticketId}`} className="w-full sm:w-auto">
+                      <Button variant="outline" size="sm" className="w-full text-xs text-[#4F46E5] border-indigo-200 hover:bg-indigo-50 font-semibold py-1.5">
+                        Track Live
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-[#E2E8F0] text-[#64748B]">
+                    <th className="pb-3 font-semibold">Ticket ID</th>
+                    <th className="pb-3 font-semibold">Device</th>
+                    <th className="pb-3 font-semibold">Problem</th>
+                    <th className="pb-3 font-semibold">Status</th>
+                    <th className="pb-3 font-semibold">Appointment</th>
+                    <th className="pb-3 font-semibold text-right">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[#E2E8F0]">
+                  {repairs.map((repair) => (
+                    <tr key={repair._id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 font-mono font-bold text-[#4F46E5]">
+                        {repair.ticketId}
+                      </td>
+                      <td className="py-3 text-[#111827] font-semibold">
+                        {repair.device?.brand} {repair.device?.model}
+                      </td>
+                      <td className="py-3 text-[#475569] max-w-xs truncate">
+                        {repair.problem?.category}
+                      </td>
+                      <td className="py-3">
+                        <Badge status={repair.status} />
+                      </td>
+                      <td className="py-3 text-[#64748B]">
+                        {new Date(repair.appointment?.date).toLocaleDateString('en-IN')}
+                      </td>
+                      <td className="py-3 text-right">
+                        <Link to={`/track?ticketId=${repair.ticketId}`}>
+                          <Button variant="ghost" size="sm" className="text-xs text-[#4F46E5] hover:bg-indigo-50 font-semibold">
+                            Track Live
+                          </Button>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
     </div>

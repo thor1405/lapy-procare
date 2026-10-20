@@ -242,7 +242,39 @@ export const AdminDashboard = () => {
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile Cards View (< md) */}
+        <div className="md:hidden divide-y divide-[#E2E8F0]">
+          {recentBookings.map((b) => (
+            <div key={b._id} className="py-3.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <Link
+                  to={`/admin/bookings?search=${b.ticketId}`}
+                  className="font-mono text-sm font-bold text-[#4F46E5] hover:underline"
+                >
+                  {b.ticketId}
+                </Link>
+                <Badge status={b.status} />
+              </div>
+
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-[#111827]">{b.customer?.name || 'Customer'}</span>
+                <span className="text-[#64748B]">
+                  {new Date(b.appointment?.date).toLocaleDateString('en-IN')}
+                </span>
+              </div>
+
+              <div className="text-xs text-[#475569] bg-slate-50 p-2 rounded-lg flex items-center justify-between">
+                <span>{b.device?.brand} {b.device?.model}</span>
+                <span className="text-[11px] text-[#64748B]">
+                  {b.assignedTechnician ? b.assignedTechnician.name : 'Unassigned'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table (>= md) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[#E2E8F0] text-[#64748B]">

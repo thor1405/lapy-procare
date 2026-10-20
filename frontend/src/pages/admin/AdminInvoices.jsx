@@ -130,75 +130,151 @@ export const AdminInvoices = () => {
             <p className="text-sm font-semibold text-[#111827]">No invoices on file</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B]">
-                <tr>
-                  <th className="py-3 px-4 font-semibold">Invoice #</th>
-                  <th className="py-3 px-4 font-semibold">Ticket Ref</th>
-                  <th className="py-3 px-4 font-semibold">Customer</th>
-                  <th className="py-3 px-4 font-semibold">Total (₹)</th>
-                  <th className="py-3 px-4 font-semibold">Balance Due</th>
-                  <th className="py-3 px-4 font-semibold">Status</th>
-                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E2E8F0]">
-                {invoices.map((inv) => (
-                  <tr key={inv._id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#4F46E5]">
-                      {inv.invoiceNumber}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-[#475569]">{inv.ticketId}</td>
-                    <td className="py-3.5 px-4 text-[#111827] font-semibold">
-                      {inv.billingDetails?.name || inv.customer?.name}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono font-semibold text-[#111827]">
-                      ₹{inv.totalAmount.toLocaleString('en-IN')}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono">
+          <>
+            {/* Mobile Cards (< md) */}
+            <div className="md:hidden divide-y divide-[#E2E8F0]">
+              {invoices.map((inv) => (
+                <div key={inv._id} className="p-4 space-y-3 bg-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-mono text-sm font-bold text-[#4F46E5]">{inv.invoiceNumber}</span>
+                      <span className="text-[11px] text-[#64748B] block font-mono">Ref: {inv.ticketId}</span>
+                    </div>
+                    <Badge status={inv.paymentStatus} />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                    <div>
+                      <span className="text-[#64748B] text-[10px] uppercase font-bold block">Customer</span>
+                      <span className="font-semibold text-[#111827] truncate block">
+                        {inv.billingDetails?.name || inv.customer?.name}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[#64748B] text-[10px] uppercase font-bold block">Total Amount</span>
+                      <span className="font-mono font-bold text-[#111827]">
+                        ₹{inv.totalAmount.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[#64748B] text-[10px] uppercase font-bold block">Balance Due</span>
                       {inv.balanceDue > 0 ? (
-                        <span className="text-rose-600 font-bold">₹{inv.balanceDue.toLocaleString('en-IN')}</span>
+                        <span className="text-rose-600 font-bold font-mono">
+                          ₹{inv.balanceDue.toLocaleString('en-IN')}
+                        </span>
                       ) : (
                         <span className="text-teal-700 font-bold">Settled</span>
                       )}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <Badge status={inv.paymentStatus} />
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {inv.balanceDue > 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedInvoice(inv);
-                              setPayAmount(inv.balanceDue);
-                              setPayMethod('UPI');
-                              setTransactionRef('');
-                              setPaymentModalOpen(true);
-                            }}
-                            className="text-xs py-1"
-                          >
-                            Record Pay
-                          </Button>
-                        )}
-                        <a
-                          href={`/api/v1/invoices/${inv._id}/pdf`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[#4F46E5] hover:underline inline-flex items-center gap-1 font-semibold"
-                        >
-                          <Download className="w-3.5 h-3.5" /> PDF
-                        </a>
-                      </div>
-                    </td>
+                    </div>
+                    <div>
+                      <span className="text-[#64748B] text-[10px] uppercase font-bold block">Date</span>
+                      <span className="text-[#475569]">
+                        {new Date(inv.createdAt).toLocaleDateString('en-IN')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    {inv.balanceDue > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedInvoice(inv);
+                          setPayAmount(inv.balanceDue);
+                          setPayMethod('UPI');
+                          setTransactionRef('');
+                          setPaymentModalOpen(true);
+                        }}
+                        className="text-xs py-1.5"
+                      >
+                        Record Pay
+                      </Button>
+                    )}
+                    <a
+                      href={`/api/v1/invoices/${inv._id}/pdf`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 rounded-xl border border-indigo-200 text-[#4F46E5] hover:bg-indigo-50 text-xs inline-flex items-center gap-1 font-semibold"
+                    >
+                      <Download className="w-3.5 h-3.5" /> PDF
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B]">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold">Invoice #</th>
+                    <th className="py-3 px-4 font-semibold">Ticket Ref</th>
+                    <th className="py-3 px-4 font-semibold">Customer</th>
+                    <th className="py-3 px-4 font-semibold">Total (₹)</th>
+                    <th className="py-3 px-4 font-semibold">Balance Due</th>
+                    <th className="py-3 px-4 font-semibold">Status</th>
+                    <th className="py-3 px-4 font-semibold text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[#E2E8F0]">
+                  {invoices.map((inv) => (
+                    <tr key={inv._id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[#4F46E5]">
+                        {inv.invoiceNumber}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-[#475569]">{inv.ticketId}</td>
+                      <td className="py-3.5 px-4 text-[#111827] font-semibold">
+                        {inv.billingDetails?.name || inv.customer?.name}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono font-semibold text-[#111827]">
+                        ₹{inv.totalAmount.toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono">
+                        {inv.balanceDue > 0 ? (
+                          <span className="text-rose-600 font-bold">₹{inv.balanceDue.toLocaleString('en-IN')}</span>
+                        ) : (
+                          <span className="text-teal-700 font-bold">Settled</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <Badge status={inv.paymentStatus} />
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {inv.balanceDue > 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedInvoice(inv);
+                                setPayAmount(inv.balanceDue);
+                                setPayMethod('UPI');
+                                setTransactionRef('');
+                                setPaymentModalOpen(true);
+                              }}
+                              className="text-xs py-1"
+                            >
+                              Record Pay
+                            </Button>
+                          )}
+                          <a
+                            href={`/api/v1/invoices/${inv._id}/pdf`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[#4F46E5] hover:underline inline-flex items-center gap-1 font-semibold"
+                          >
+                            <Download className="w-3.5 h-3.5" /> PDF
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
 

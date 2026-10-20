@@ -205,84 +205,148 @@ export const AdminBookings = () => {
             <p className="text-xs">Try clearing the search query or changing filters.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B]">
-                <tr>
-                  <th className="py-3 px-4 font-semibold">Ticket ID</th>
-                  <th className="py-3 px-4 font-semibold">Customer & Contact</th>
-                  <th className="py-3 px-4 font-semibold">Device</th>
-                  <th className="py-3 px-4 font-semibold">Status</th>
-                  <th className="py-3 px-4 font-semibold">Service Lead</th>
-                  <th className="py-3 px-4 font-semibold">Appointment</th>
-                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E2E8F0]">
-                {bookings.map((b) => (
-                  <tr key={b._id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#4F46E5]">
+          <>
+            {/* Mobile Touch-Friendly Card View (<768px) */}
+            <div className="md:hidden divide-y divide-[#E2E8F0]">
+              {bookings.map((b) => (
+                <div key={b._id} className="p-4 space-y-3 bg-white hover:bg-slate-50/50">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono font-bold text-xs text-[#4F46E5] bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">
                       {b.ticketId}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="text-[#111827] font-semibold block">{b.customer?.name}</span>
-                      <span className="text-[11px] text-[#64748B]">{b.customer?.phone}</span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="text-[#111827] font-medium block">
-                        {b.device?.brand} {b.device?.model}
-                      </span>
-                      <span className="text-[11px] text-[#64748B]">{b.problem?.category}</span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <Badge status={b.status} />
-                    </td>
-                    <td className="py-3.5 px-4 text-[#475569]">
-                      <span className="text-teal-700 font-semibold flex items-center gap-1.5 text-xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
-                        <span>{b.assignedTechnician?.name || 'Admin (You)'}</span>
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-[#64748B]">
+                    </span>
+                    <Badge status={b.status} />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Customer</span>
+                      <span className="text-[#111827] font-semibold block truncate">{b.customer?.name}</span>
+                      <a href={`tel:${b.customer?.phone}`} className="text-teal-700 font-mono text-[11px] underline">
+                        {b.customer?.phone}
+                      </a>
+                    </div>
+                    <div>
+                      <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Device</span>
+                      <span className="text-[#111827] font-medium block truncate">{b.device?.brand} {b.device?.model}</span>
+                      <span className="text-[#64748B] text-[11px] truncate block">{b.problem?.category}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between border-t border-slate-100 text-[11px]">
+                    <span className="text-[#64748B]">
                       {new Date(b.appointment?.date).toLocaleDateString('en-IN')}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedBooking(b);
-                            setNewStatus(b.status);
-                            setStatusNote('');
-                            setStatusModalOpen(true);
-                          }}
-                          title="Update Status & Stage"
-                          className="p-1.5 text-[#4F46E5] hover:bg-indigo-50"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedBooking(b);
-                            setCustomNote('');
-                            setIsInternalNote(false);
-                            setNoteModalOpen(true);
-                          }}
-                          title="Add Note"
-                          className="p-1.5 text-teal-600 hover:bg-teal-50"
-                        >
-                          <MessageSquare className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </td>
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedBooking(b);
+                          setNewStatus(b.status);
+                          setStatusNote('');
+                          setStatusModalOpen(true);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-indigo-50 text-[#4F46E5] font-semibold border border-indigo-200 text-xs flex items-center gap-1"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                        <span>Update</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedBooking(b);
+                          setCustomNote('');
+                          setIsInternalNote(false);
+                          setNoteModalOpen(true);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 text-[#475569] font-semibold border border-slate-200 text-xs flex items-center gap-1"
+                      >
+                        <MessageSquare className="w-3 h-3" />
+                        <span>Note</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table (hidden md:block) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B]">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold">Ticket ID</th>
+                    <th className="py-3 px-4 font-semibold">Customer & Contact</th>
+                    <th className="py-3 px-4 font-semibold">Device</th>
+                    <th className="py-3 px-4 font-semibold">Status</th>
+                    <th className="py-3 px-4 font-semibold">Service Lead</th>
+                    <th className="py-3 px-4 font-semibold">Appointment</th>
+                    <th className="py-3 px-4 font-semibold text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[#E2E8F0]">
+                  {bookings.map((b) => (
+                    <tr key={b._id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[#4F46E5]">
+                        {b.ticketId}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className="text-[#111827] font-semibold block">{b.customer?.name}</span>
+                        <span className="text-[11px] text-[#64748B]">{b.customer?.phone}</span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className="text-[#111827] font-medium block">
+                          {b.device?.brand} {b.device?.model}
+                        </span>
+                        <span className="text-[11px] text-[#64748B]">{b.problem?.category}</span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <Badge status={b.status} />
+                      </td>
+                      <td className="py-3.5 px-4 text-[#475569]">
+                        <span className="text-teal-700 font-semibold flex items-center gap-1.5 text-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+                          <span>{b.assignedTechnician?.name || 'Admin (You)'}</span>
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-[#64748B]">
+                        {new Date(b.appointment?.date).toLocaleDateString('en-IN')}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedBooking(b);
+                              setNewStatus(b.status);
+                              setStatusNote('');
+                              setStatusModalOpen(true);
+                            }}
+                            title="Update Status & Stage"
+                            className="p-1.5 text-[#4F46E5] hover:bg-indigo-50"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedBooking(b);
+                              setCustomNote('');
+                              setIsInternalNote(false);
+                              setNoteModalOpen(true);
+                            }}
+                            title="Add Note"
+                            className="p-1.5 text-teal-600 hover:bg-teal-50"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
 

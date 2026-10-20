@@ -258,6 +258,46 @@ export const Home = () => {
                 </div>
               </div>
 
+              {/* Mobile Status Pills Grid (<640px) */}
+              <div className="grid grid-cols-2 gap-2 pt-3.5 sm:hidden">
+                <div className="bg-white border border-[#E2E8F0] rounded-xl p-2.5 flex items-center gap-2 shadow-xs">
+                  <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <Activity className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <span className="text-[9px] uppercase font-bold text-[#64748B] block">Stage 01</span>
+                    <span className="text-[11px] font-bold text-[#111827]">Diagnosis</span>
+                  </div>
+                </div>
+                <div className="bg-white border border-[#E2E8F0] rounded-xl p-2.5 flex items-center gap-2 shadow-xs">
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <Wrench className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <span className="text-[9px] uppercase font-bold text-[#64748B] block">Status</span>
+                    <span className="text-[11px] font-bold text-[#111827]">In Progress</span>
+                  </div>
+                </div>
+                <div className="bg-white border border-[#E2E8F0] rounded-xl p-2.5 flex items-center gap-2 shadow-xs">
+                  <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  </div>
+                  <div>
+                    <span className="text-[9px] uppercase font-bold text-teal-600 block">Tested</span>
+                    <span className="text-[11px] font-bold text-[#111827]">Completed</span>
+                  </div>
+                </div>
+                <div className="bg-white border border-[#E2E8F0] rounded-xl p-2.5 flex items-center gap-2 shadow-xs">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                    <UserCheck className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <span className="text-[9px] uppercase font-bold text-indigo-600 block">Certified</span>
+                    <span className="text-[11px] font-bold text-[#111827]">Lead Tech</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>

@@ -171,65 +171,125 @@ export const AdminInventory = () => {
             <p className="text-sm font-semibold text-[#111827]">No inventory items found</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B]">
-                <tr>
-                  <th className="py-3 px-4 font-semibold">SKU</th>
-                  <th className="py-3 px-4 font-semibold">Part Description</th>
-                  <th className="py-3 px-4 font-semibold">Category</th>
-                  <th className="py-3 px-4 font-semibold">In Stock</th>
-                  <th className="py-3 px-4 font-semibold">Buy / Sell (₹)</th>
-                  <th className="py-3 px-4 font-semibold">Location</th>
-                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E2E8F0]">
-                {items.map((item) => {
-                  const isLow = item.quantity <= item.reorderThreshold;
-                  return (
-                    <tr key={item._id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-[#4F46E5]">
-                        {item.sku}
-                      </td>
-                      <td className="py-3.5 px-4 text-[#111827] font-semibold">
-                        {item.name}
-                        {isLow && (
-                          <span className="ml-2 inline-flex items-center gap-1 text-[10px] text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 font-semibold">
-                            Low Stock
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 text-[#475569]">{item.category}</td>
-                      <td className="py-3.5 px-4 font-mono font-bold">
-                        <span className={isLow ? 'text-rose-600' : 'text-teal-700'}>
+          <>
+            {/* Mobile Cards (< md) */}
+            <div className="md:hidden divide-y divide-[#E2E8F0]">
+              {items.map((item) => {
+                const isLow = item.quantity <= item.reorderThreshold;
+                return (
+                  <div key={item._id} className="p-4 space-y-3 bg-white">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-mono text-xs font-bold text-[#4F46E5]">{item.sku}</span>
+                          {isLow && (
+                            <span className="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 font-bold">
+                              Low Stock
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-sm font-bold text-[#111827] mt-1">{item.name}</h4>
+                        <span className="text-[11px] text-[#64748B]">{item.category} • {item.location}</span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className={`font-mono text-sm font-extrabold ${isLow ? 'text-rose-600' : 'text-teal-700'}`}>
                           {item.quantity} units
                         </span>
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-[#475569]">
-                        ₹{item.purchasePrice} / <strong className="text-[#111827]">₹{item.sellingPrice}</strong>
-                      </td>
-                      <td className="py-3.5 px-4 text-[#64748B]">{item.location}</td>
-                      <td className="py-3.5 px-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedItem(item);
-                            setMovementData({ movementType: 'PURCHASE_IN', quantity: 1, notes: '' });
-                            setMovementModalOpen(true);
-                          }}
-                          className="text-xs text-[#4F46E5] hover:bg-indigo-50 font-semibold"
-                        >
-                          <ArrowUpDown className="w-3.5 h-3.5 mr-1" /> Adjust Stock
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <span className="text-[10px] text-[#64748B] block">Available</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                      <div>
+                        <span className="text-[#64748B] text-[10px] uppercase font-bold block">Purchase Price</span>
+                        <span className="font-mono text-[#475569]">₹{item.purchasePrice}</span>
+                      </div>
+                      <div>
+                        <span className="text-[#64748B] text-[10px] uppercase font-bold block">Selling Price</span>
+                        <span className="font-mono font-bold text-[#111827]">₹{item.sellingPrice}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setMovementData({ movementType: 'PURCHASE_IN', quantity: 1, notes: '' });
+                          setMovementModalOpen(true);
+                        }}
+                        className="text-xs text-[#4F46E5] hover:bg-indigo-50 font-semibold"
+                      >
+                        <ArrowUpDown className="w-3.5 h-3.5 mr-1" /> Adjust Stock
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B]">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold">SKU</th>
+                    <th className="py-3 px-4 font-semibold">Part Description</th>
+                    <th className="py-3 px-4 font-semibold">Category</th>
+                    <th className="py-3 px-4 font-semibold">In Stock</th>
+                    <th className="py-3 px-4 font-semibold">Buy / Sell (₹)</th>
+                    <th className="py-3 px-4 font-semibold">Location</th>
+                    <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E2E8F0]">
+                  {items.map((item) => {
+                    const isLow = item.quantity <= item.reorderThreshold;
+                    return (
+                      <tr key={item._id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3.5 px-4 font-mono font-bold text-[#4F46E5]">
+                          {item.sku}
+                        </td>
+                        <td className="py-3.5 px-4 text-[#111827] font-semibold">
+                          {item.name}
+                          {isLow && (
+                            <span className="ml-2 inline-flex items-center gap-1 text-[10px] text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 font-semibold">
+                              Low Stock
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 text-[#475569]">{item.category}</td>
+                        <td className="py-3.5 px-4 font-mono font-bold">
+                          <span className={isLow ? 'text-rose-600' : 'text-teal-700'}>
+                            {item.quantity} units
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-[#475569]">
+                          ₹{item.purchasePrice} / <strong className="text-[#111827]">₹{item.sellingPrice}</strong>
+                        </td>
+                        <td className="py-3.5 px-4 text-[#64748B]">{item.location}</td>
+                        <td className="py-3.5 px-4 text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setMovementData({ movementType: 'PURCHASE_IN', quantity: 1, notes: '' });
+                              setMovementModalOpen(true);
+                            }}
+                            className="text-xs text-[#4F46E5] hover:bg-indigo-50 font-semibold"
+                          >
+                            <ArrowUpDown className="w-3.5 h-3.5 mr-1" /> Adjust Stock
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
 

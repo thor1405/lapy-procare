@@ -12,10 +12,10 @@ export const WhatsAppFloating = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40">
       {/* Quick Action Popup Modal */}
       {isOpen && (
-        <div className="mb-4 w-72 sm:w-80 bg-white border border-[#E2E8F0] rounded-2xl shadow-premium p-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div className="mb-3 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-white border border-[#E2E8F0] rounded-2xl shadow-premium p-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
           <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center font-bold">

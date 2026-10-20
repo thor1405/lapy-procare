@@ -149,51 +149,107 @@ export const AdminQuotations = () => {
             <p className="text-sm font-semibold text-[#111827]">No quotations issued yet</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B]">
-                <tr>
-                  <th className="py-3 px-4 font-semibold">Quotation #</th>
-                  <th className="py-3 px-4 font-semibold">Ticket Ref</th>
-                  <th className="py-3 px-4 font-semibold">Customer</th>
-                  <th className="py-3 px-4 font-semibold">Status</th>
-                  <th className="py-3 px-4 font-semibold">Amount (₹)</th>
-                  <th className="py-3 px-4 font-semibold">Expires</th>
-                  <th className="py-3 px-4 font-semibold text-right">PDF</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E2E8F0]">
-                {quotations.map((q) => (
-                  <tr key={q._id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#4F46E5]">
-                      {q.quotationNumber}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-[#475569]">{q.ticketId}</td>
-                    <td className="py-3.5 px-4 text-[#111827] font-semibold">{q.customer?.name}</td>
-                    <td className="py-3.5 px-4">
-                      <Badge status={q.status} />
-                    </td>
-                    <td className="py-3.5 px-4 font-mono font-semibold text-[#111827]">
-                      ₹{q.totalAmount.toLocaleString('en-IN')}
-                    </td>
-                    <td className="py-3.5 px-4 text-[#64748B]">
-                      {new Date(q.expiresAt).toLocaleDateString('en-IN')}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <a
-                        href={`/api/v1/quotations/${q._id}/pdf`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[#4F46E5] hover:underline inline-flex items-center gap-1 font-semibold"
-                      >
-                        <Download className="w-3.5 h-3.5" /> PDF
-                      </a>
-                    </td>
+          <>
+            {/* Mobile Cards (< md) */}
+            <div className="md:hidden divide-y divide-[#E2E8F0]">
+              {quotations.map((q) => (
+                <div key={q._id} className="p-4 space-y-3 bg-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-mono text-sm font-bold text-[#4F46E5]">{q.quotationNumber}</span>
+                      <span className="text-[11px] text-[#64748B] block font-mono">Ref: {q.ticketId}</span>
+                    </div>
+                    <Badge status={q.status} />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                    <div>
+                      <span className="text-[#64748B] text-[10px] uppercase font-bold block">Customer</span>
+                      <span className="font-semibold text-[#111827] truncate block">
+                        {q.customer?.name || 'Customer'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[#64748B] text-[10px] uppercase font-bold block">Total Amount</span>
+                      <span className="font-mono font-bold text-[#111827]">
+                        ₹{q.totalAmount.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[#64748B] text-[10px] uppercase font-bold block">Expires On</span>
+                      <span className="text-[#475569]">
+                        {new Date(q.expiresAt).toLocaleDateString('en-IN')}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[#64748B] text-[10px] uppercase font-bold block">Issued On</span>
+                      <span className="text-[#475569]">
+                        {new Date(q.createdAt).toLocaleDateString('en-IN')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end pt-1">
+                    <a
+                      href={`/api/v1/quotations/${q._id}/pdf`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 rounded-xl border border-indigo-200 text-[#4F46E5] hover:bg-indigo-50 text-xs inline-flex items-center gap-1 font-semibold"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Download PDF
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B]">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold">Quotation #</th>
+                    <th className="py-3 px-4 font-semibold">Ticket Ref</th>
+                    <th className="py-3 px-4 font-semibold">Customer</th>
+                    <th className="py-3 px-4 font-semibold">Status</th>
+                    <th className="py-3 px-4 font-semibold">Amount (₹)</th>
+                    <th className="py-3 px-4 font-semibold">Expires</th>
+                    <th className="py-3 px-4 font-semibold text-right">PDF</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[#E2E8F0]">
+                  {quotations.map((q) => (
+                    <tr key={q._id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[#4F46E5]">
+                        {q.quotationNumber}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-[#475569]">{q.ticketId}</td>
+                      <td className="py-3.5 px-4 text-[#111827] font-semibold">{q.customer?.name}</td>
+                      <td className="py-3.5 px-4">
+                        <Badge status={q.status} />
+                      </td>
+                      <td className="py-3.5 px-4 font-mono font-semibold text-[#111827]">
+                        ₹{q.totalAmount.toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-3.5 px-4 text-[#64748B]">
+                        {new Date(q.expiresAt).toLocaleDateString('en-IN')}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <a
+                          href={`/api/v1/quotations/${q._id}/pdf`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[#4F46E5] hover:underline inline-flex items-center gap-1 font-semibold"
+                        >
+                          <Download className="w-3.5 h-3.5" /> PDF
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
 
