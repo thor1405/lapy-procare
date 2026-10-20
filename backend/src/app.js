@@ -30,6 +30,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Enable Trust Proxy for Cloudflare / Nginx Reverse Proxies
+app.set('trust proxy', 1);
+
 // Base Security Headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },

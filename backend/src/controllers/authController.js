@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 import { User } from '../models/User.js';
 import { RefreshSession } from '../models/RefreshSession.js';
 import { PasswordResetToken } from '../models/PasswordResetToken.js';
@@ -53,6 +54,14 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
 
 export const register = async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return errorResponse(
+        res,
+        'Database connection is currently offline. Please check your MONGO_URI in .env (ensure your Atlas cluster subdomain is correct, e.g. cluster0.abcde.mongodb.net, and Network Access allows 0.0.0.0/0).',
+        503
+      );
+    }
+
     const { name, email, phone, password, confirmPassword } = req.body;
 
     if (!name || !email || !phone || !password) {
@@ -108,6 +117,14 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return errorResponse(
+        res,
+        'Database connection is currently offline. Please check your MONGO_URI in .env (ensure your Atlas cluster subdomain is correct, e.g. cluster0.abcde.mongodb.net, and Network Access allows 0.0.0.0/0).',
+        503
+      );
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {
