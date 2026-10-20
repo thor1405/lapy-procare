@@ -191,9 +191,9 @@ export const Tracking = () => {
           </Card>
 
           {/* Stepper Stage Tracker */}
-          <Card className="p-6 sm:p-8 border-[#E2E8F0]">
+          <Card className="p-6 sm:p-8 border-[#E2E8F0] shadow-sm">
             <h3 className="text-base sm:text-lg font-bold text-[#111827] mb-6 flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+              <CheckCircle2 className="w-5 h-5 text-[#4F46E5]" />
               <span>Repair Lifecycle Stage</span>
             </h3>
 
@@ -203,44 +203,64 @@ export const Tracking = () => {
               </div>
             ) : (
               <div className="relative">
-                <div className="overflow-x-auto pb-4">
-                  <div className="min-w-[650px] flex items-center justify-between relative">
-                    {/* Horizontal Connector Line */}
-                    <div className="absolute top-4 left-6 right-6 h-1 bg-slate-200 -z-0" />
-
+                <div className="overflow-x-auto pb-4 pt-2 -mx-2 px-2">
+                  <div className="min-w-[920px] flex items-start justify-between">
                     {ALL_STAGES.map((stage, idx) => {
                       const currentIdx = getCurrentStageIndex(trackingData.status);
                       const isCompleted = idx <= currentIdx;
                       const isCurrent = idx === currentIdx;
+                      const isNextStepDone = idx < currentIdx;
+                      const isNextStepCurrent = idx + 1 === currentIdx;
+                      const isLast = idx === ALL_STAGES.length - 1;
 
                       return (
-                        <div
-                          key={stage}
-                          className="flex flex-col items-center text-center z-10 w-24"
-                        >
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                              isCurrent
-                                ? 'bg-[#4F46E5] text-white ring-4 ring-indigo-100 scale-110 shadow-md'
-                                : isCompleted
-                                ? 'bg-teal-600 text-white'
-                                : 'bg-slate-100 text-slate-400 border border-slate-200'
-                            }`}
-                          >
-                            {isCompleted ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : idx + 1}
+                        <React.Fragment key={stage}>
+                          {/* Step Node */}
+                          <div className="flex flex-col items-center text-center w-24 sm:w-28 shrink-0">
+                            {/* Circle Container: Exactly 40px tall with circle centered at 20px */}
+                            <div className="h-10 w-10 flex items-center justify-center">
+                              <div
+                                className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                                  isCurrent
+                                    ? 'bg-[#4F46E5] text-white ring-4 ring-indigo-100 shadow-md shadow-indigo-500/20 scale-110 z-10'
+                                    : isCompleted
+                                    ? 'bg-teal-600 text-white z-10'
+                                    : 'bg-white text-slate-400 border-2 border-slate-200 z-10'
+                                }`}
+                              >
+                                {isCompleted ? <Check className="w-4 h-4 stroke-[3]" /> : idx + 1}
+                              </div>
+                            </div>
+
+                            {/* Label underneath - starts strictly at fixed offset and grows downwards */}
+                            <span
+                              className={`text-[11px] mt-2.5 font-medium leading-snug px-1 text-center ${
+                                isCurrent
+                                  ? 'text-[#4F46E5] font-bold'
+                                  : isCompleted
+                                  ? 'text-[#111827] font-semibold'
+                                  : 'text-[#64748B]'
+                              }`}
+                            >
+                              {stage}
+                            </span>
                           </div>
-                          <span
-                            className={`text-[11px] mt-2 font-medium leading-tight ${
-                              isCurrent
-                                ? 'text-indigo-600 font-bold'
-                                : isCompleted
-                                ? 'text-slate-800'
-                                : 'text-slate-400'
-                            }`}
-                          >
-                            {stage}
-                          </span>
-                        </div>
+
+                          {/* Horizontal Connector Line: Exactly 40px tall with line centered at 20px */}
+                          {!isLast && (
+                            <div className="flex-1 h-10 flex items-center -mx-1 shrink">
+                              <div
+                                className={`h-1 w-full rounded-full transition-all duration-300 ${
+                                  isNextStepCurrent
+                                    ? 'bg-gradient-to-r from-teal-600 to-[#4F46E5]'
+                                    : isNextStepDone
+                                    ? 'bg-teal-600'
+                                    : 'bg-slate-200'
+                                }`}
+                              />
+                            </div>
+                          )}
+                        </React.Fragment>
                       );
                     })}
                   </div>

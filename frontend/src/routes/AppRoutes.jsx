@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Layouts
 import { MainLayout } from '../layouts/MainLayout';
@@ -54,7 +54,7 @@ export const AppRoutes = () => {
         <Route path="services" element={<Services />} />
         <Route path="track" element={<Tracking />} />
         <Route path="pc-builder" element={<CustomPCBuilder />} />
-        <Route path="ai-assistant" element={<AIAssistant />} />
+        <Route path="ai-assistant" element={<Navigate to="/services" replace />} />
         <Route path="contact" element={<Contact />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />

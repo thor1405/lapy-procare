@@ -29,7 +29,6 @@ export const Navbar = () => {
     { name: 'Services', path: '/services' },
     { name: 'Track Repair', path: '/track' },
     { name: 'Custom PC Builds', path: '/pc-builder' },
-    { name: 'AI Diagnostic', path: '/ai-assistant' },
     { name: 'Contact', path: '/contact' },
   ];
 
