@@ -138,7 +138,11 @@ export const Tracking = () => {
           <p className="text-xs text-rose-700 max-w-md mx-auto mb-4">{errorMsg}</p>
           <p className="text-xs text-[#64748B]">
             Need help? WhatsApp our Vamanjoor desk at{' '}
-            <a href="https://wa.me/917666104889" className="text-indigo-600 font-semibold underline">
+            <a href="https://wa.me/919606668315" className="text-teal-700 font-semibold underline">
+              +91 9606668315
+            </a>{' '}
+            or call{' '}
+            <a href="tel:+917666104889" className="text-indigo-600 font-semibold underline">
               +91 7666104889
             </a>
           </p>
@@ -165,26 +169,27 @@ export const Tracking = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 text-xs">
               <div>
                 <span className="text-[#64748B] block mb-0.5">Device</span>
-                <span className="text-[#111827] font-semibold">
+                <span className="text-[#111827] font-semibold block truncate">
                   {trackingData.device?.brand} {trackingData.device?.model}
+                </span>
+                <span className="text-[10px] text-indigo-600 font-medium">
+                  {trackingData.device?.deviceType || 'Hardware'}
                 </span>
               </div>
               <div>
                 <span className="text-[#64748B] block mb-0.5">Reported Issue</span>
-                <span className="text-[#111827] font-semibold">{trackingData.problemCategory}</span>
+                <span className="text-[#111827] font-semibold block">{trackingData.problemCategory}</span>
               </div>
               <div>
                 <span className="text-[#64748B] block mb-0.5">Appointment Date</span>
-                <span className="text-[#111827] font-semibold">
+                <span className="text-[#111827] font-semibold block">
                   {new Date(trackingData.appointment?.date).toLocaleDateString('en-IN')}
                 </span>
               </div>
               <div>
-                <span className="text-[#64748B] block mb-0.5">Est. Completion</span>
-                <span className="text-indigo-600 font-semibold">
-                  {trackingData.estimatedCompletionDate
-                    ? new Date(trackingData.estimatedCompletionDate).toLocaleDateString('en-IN')
-                    : 'Diagnosis in Progress'}
+                <span className="text-[#64748B] block mb-0.5">Service Type</span>
+                <span className="text-teal-700 font-bold block">
+                  {trackingData.servicePreference?.toLowerCase().includes('doorstep') ? '🏠 Doorstep Home Service' : '📍 Workshop Drop-off'}
                 </span>
               </div>
             </div>

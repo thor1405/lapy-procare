@@ -228,7 +228,12 @@ export const AdminBookings = () => {
                     <div>
                       <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Device</span>
                       <span className="text-[#111827] font-medium block truncate">{b.device?.brand} {b.device?.model}</span>
-                      <span className="text-[#64748B] text-[11px] truncate block">{b.problem?.category}</span>
+                      <span className="text-[#64748B] text-[11px] truncate block">{b.device?.deviceType || 'Hardware'} • {b.problem?.category}</span>
+                      {b.servicePreference?.toLowerCase().includes('doorstep') && (
+                        <span className="inline-block mt-1 text-[10px] text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 font-semibold">
+                          🏠 Home Service
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -295,7 +300,14 @@ export const AdminBookings = () => {
                         <span className="text-[#111827] font-medium block">
                           {b.device?.brand} {b.device?.model}
                         </span>
-                        <span className="text-[11px] text-[#64748B]">{b.problem?.category}</span>
+                        <span className="text-[11px] text-[#64748B] block">
+                          {b.device?.deviceType || 'Hardware'} • {b.problem?.category}
+                        </span>
+                        {b.servicePreference?.toLowerCase().includes('doorstep') && (
+                          <span className="inline-block mt-0.5 text-[10px] text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200 font-semibold">
+                            🏠 Home Service
+                          </span>
+                        )}
                       </td>
                       <td className="py-3.5 px-4">
                         <Badge status={b.status} />

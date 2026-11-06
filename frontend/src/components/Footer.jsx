@@ -18,7 +18,7 @@ export const Footer = () => {
               </span>
             </Link>
             <p className="text-xs text-[#64748B] leading-relaxed">
-              Fast. Reliable. Professional. Premium computer, laptop logic board servicing, custom PC builds, and networking engineered with precision in Mangaluru.
+              Fast. Reliable. Professional. Precision tech repair services for Computers, Mobile Phones, and Gaming Consoles with Home Service available across Mangaluru.
             </p>
             <div className="flex items-center gap-2 text-xs text-[#4F46E5] font-semibold">
               <ShieldCheck className="w-4 h-4 text-teal-600" />
@@ -34,32 +34,32 @@ export const Footer = () => {
             <ul className="space-y-2.5 text-xs text-[#475569]">
               <li>
                 <Link to="/services" className="hover:text-[#4F46E5] transition-colors">
-                  Chip-Level Laptop Repair
+                  Computer & Laptop Repair
                 </Link>
               </li>
               <li>
                 <Link to="/services" className="hover:text-[#4F46E5] transition-colors">
-                  Desktop Tower Diagnostics
+                  Mobile & Smartphone Service
                 </Link>
               </li>
               <li>
                 <Link to="/services" className="hover:text-[#4F46E5] transition-colors">
-                  RAM & NVMe SSD Upgrades
+                  Gaming Console Overhaul (PS5 / Xbox)
+                </Link>
+              </li>
+              <li>
+                <Link to="/customer/book" className="hover:text-teal-600 transition-colors font-semibold text-teal-700">
+                  🏠 Home Service (Doorstep Repair)
                 </Link>
               </li>
               <li>
                 <Link to="/pc-builder" className="hover:text-[#4F46E5] transition-colors">
-                  Custom Gaming & Workstation Builds
+                  Custom Workstations & Gaming Builds
                 </Link>
               </li>
               <li>
                 <Link to="/services" className="hover:text-[#4F46E5] transition-colors">
-                  CCTV Security Surveillance
-                </Link>
-              </li>
-              <li>
-                <Link to="/services" className="hover:text-[#4F46E5] transition-colors">
-                  Enterprise IT AMC Maintenance
+                  RAM & PCIe Gen4 SSD Upgrades
                 </Link>
               </li>
             </ul>
@@ -111,6 +111,12 @@ export const Footer = () => {
                 <Phone className="w-4 h-4 text-[#4F46E5] shrink-0" />
                 <a href="tel:+917666104889" className="hover:text-[#4F46E5] transition-colors font-mono font-medium">
                   +91 7666104889
+                </a>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="w-4 h-4 flex items-center justify-center font-bold text-teal-600 text-xs">WA</span>
+                <a href="https://wa.me/919606668315" target="_blank" rel="noreferrer" className="text-teal-700 hover:text-teal-900 transition-colors font-mono font-medium">
+                  +91 9606668315
                 </a>
               </li>
               <li className="flex items-center gap-2.5">

@@ -16,20 +16,24 @@ import {
 
 const FAQS = [
   {
-    q: 'How long does a typical laptop diagnosis take?',
+    q: 'Do you provide Home / Doorstep service in Mangaluru?',
+    a: 'Yes! We offer on-site Home Service across Mangaluru, Vamanjoor, Kadri, Surathkal, and surrounding areas. Our technician visits your home or office for on-site diagnostics, minor component repairs, software setup, or complimentary safe transit to our workshop.',
+  },
+  {
+    q: 'Do you repair mobile phones and Apple iPhones?',
+    a: 'Yes, we provide chip-level repair, original OLED display replacements, battery health renewals, charging port fixes, and liquid splash recovery for iPhone, Samsung, OnePlus, Google Pixel, and other major smartphones.',
+  },
+  {
+    q: 'Do you service gaming consoles like PlayStation 5 and Xbox?',
+    a: 'Yes, our laboratory specializes in micro-soldering damaged HDMI 2.1 ports, PS5 liquid metal thermal overhauls, disc drive optical repairs, power supply fixes, and DualSense / Xbox controller stick drift repairs.',
+  },
+  {
+    q: 'How long does a typical device diagnosis take?',
     a: 'Preliminary diagnostic inspection is usually concluded within 2 to 4 hours. You will receive an itemized quotation outlining fault analysis, replacement parts, and labour charges before any physical work starts.',
   },
   {
     q: 'Do you charge a diagnostic fee if I decide not to proceed with the repair?',
-    a: 'General initial checkups and evaluations are completely complimentary. You will receive an itemized diagnostic report and quotation prior to any repair commencement.',
-  },
-  {
-    q: 'Are replacement screens, batteries, and keyboards original OEM?',
-    a: 'Yes, we source 100% genuine OEM replacement panels, batteries, hinges, and cooling fans with up to 6 to 12 months manufacturer warranty.',
-  },
-  {
-    q: 'Can you build a high-end PC for architectural rendering and 3D modeling?',
-    a: 'Absolutely. We specialize in high-end multicore Intel/AMD workstations paired with RTX 40-series GPUs, ECC/high-frequency RAM, and liquid cooling with certified stress testing.',
+    a: 'Initial checkups and evaluations are completely complimentary. You will receive an itemized diagnostic report and quotation prior to any repair commencement.',
   },
 ];
 
@@ -104,10 +108,21 @@ export const Contact = () => {
               <div className="flex items-start gap-3">
                 <Phone className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-[#111827] font-semibold block mb-0.5">Telephone & WhatsApp:</span>
+                  <span className="text-[#111827] font-semibold block mb-0.5">Telephone Hotline:</span>
                   <a href="tel:+917666104889" className="text-indigo-600 font-mono font-medium hover:underline">
                     +91 7666104889
                   </a>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <MessageCircle className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-[#111827] font-semibold block mb-0.5">WhatsApp Support:</span>
+                  <a href="https://wa.me/919606668315" target="_blank" rel="noreferrer" className="text-teal-700 font-mono font-medium hover:underline">
+                    +91 9606668315
+                  </a>
+                  <span className="text-[#64748B] text-[11px] block">Secondary WA: +91 7666104889</span>
                 </div>
               </div>
 
@@ -119,6 +134,13 @@ export const Contact = () => {
                     lapyprocare@gmail.com
                   </a>
                 </div>
+              </div>
+
+              <div className="p-3 bg-teal-50 rounded-xl border border-teal-200">
+                <span className="text-teal-900 font-bold block mb-0.5">🏠 Home Service Available:</span>
+                <span className="text-teal-800 text-[11px]">
+                  Technician visits available across Mangaluru, Surathkal & nearby localities.
+                </span>
               </div>
 
               <div className="flex items-start gap-3">

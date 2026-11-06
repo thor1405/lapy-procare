@@ -33,12 +33,15 @@ export const REPAIR_STATUS_ORDER = [
 export const SERVICE_PREFERENCE = {
   DROP_OFF: 'Drop off at service center',
   DOORSTEP: 'Request doorstep service',
+  HOME_SERVICE: 'Home Service (Repair at your doorstep)',
 };
 
 export const DEVICE_TYPES = {
   LAPTOP: 'Laptop',
   DESKTOP: 'Desktop',
   GAMING_PC: 'Gaming PC',
+  MOBILE: 'Mobile / Smartphone',
+  CONSOLE: 'Gaming Console',
   OTHER: 'Other',
 };
 

@@ -51,7 +51,7 @@ export const Navbar = () => {
               LAPY <span className="text-[#4F46E5]">PROCARE</span>
             </span>
             <span className="text-[10px] tracking-wider uppercase block text-[#64748B] font-medium">
-              Vamanjoor • Mangaluru
+              Vamanjoor • Mangaluru • Home Service Available
             </span>
           </div>
         </Link>
@@ -141,6 +141,15 @@ export const Navbar = () => {
               {link.name}
             </Link>
           ))}
+
+          <Link
+            to="/customer/book"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-teal-50 border border-teal-200 text-teal-900 text-xs font-bold"
+          >
+            <span>🏠 Home Service (Repair at Your Doorstep)</span>
+            <span className="text-[10px] bg-teal-600 text-white px-2 py-0.5 rounded-full">Available</span>
+          </Link>
 
           <div className="pt-4 border-t border-slate-100 space-y-2">
             {isAuthenticated ? (

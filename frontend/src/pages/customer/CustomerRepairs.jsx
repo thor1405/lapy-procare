@@ -9,9 +9,18 @@ import api from '../../api/client';
 import { toast } from 'sonner';
 import {
   Laptop,
+  Smartphone,
+  Gamepad2,
+  Home as HomeIcon,
   AlertTriangle,
   Plus,
 } from 'lucide-react';
+
+const getDeviceIcon = (type) => {
+  if (type?.includes('Mobile') || type?.includes('Phone')) return Smartphone;
+  if (type?.includes('Console')) return Gamepad2;
+  return Laptop;
+};
 
 export const CustomerRepairs = () => {
   const [repairs, setRepairs] = useState([]);
@@ -104,15 +113,25 @@ export const CustomerRepairs = () => {
               <Card key={repair._id} className="p-5 sm:p-6 bg-white border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0]">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#4F46E5] flex items-center justify-center shrink-0 border border-indigo-100">
-                      <Laptop className="w-5 h-5" />
-                    </div>
+                    {(() => {
+                      const DeviceIcon = getDeviceIcon(repair.device?.deviceType);
+                      return (
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#4F46E5] flex items-center justify-center shrink-0 border border-indigo-100">
+                          <DeviceIcon className="w-5 h-5" />
+                        </div>
+                      );
+                    })()}
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono text-base font-bold text-[#4F46E5]">
                           {repair.ticketId}
                         </span>
                         <Badge status={repair.status} />
+                        {repair.servicePreference?.toLowerCase().includes('doorstep') && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                            🏠 Home Service
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-[#111827] font-semibold mt-0.5">
                         {repair.device?.brand} {repair.device?.model} ({repair.device?.deviceType})

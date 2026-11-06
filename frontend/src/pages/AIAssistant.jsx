@@ -15,18 +15,18 @@ import {
 
 const QUICK_PROMPTS = [
   'Laptop won’t turn on or charge',
-  'Blue Screen of Death (BSOD) crashing constantly',
-  'Accidental water or coffee spill on laptop',
-  'Laptop fan making loud noise & overheating',
-  'System is extremely slow and freezing',
+  'iPhone screen cracked & flickering lines',
+  'PS5 overheating & shutting down in games',
+  'Request Home / Doorstep service in Mangaluru',
+  'Accidental water or coffee spill on device',
 ];
 
 export const AIAssistant = () => {
   const [messages, setMessages] = useState([
     {
       sender: 'bot',
-      text: `Hello! I am the Lapy Procare Virtual IT Assistant. 
-Describe your computer's symptoms (e.g., liquid spill, black screen, thermal overheating, or slow boots), and I will provide preliminary diagnostic triage and safety guidelines.`,
+      text: `Hello! I am the Lapy Procare Virtual Tech Assistant. 
+Describe your computer, mobile phone, or gaming console symptoms (e.g., PS5 HDMI port issue, iPhone screen/battery drain, laptop liquid spill, or request Home / Doorstep service in Mangaluru), and I will provide preliminary diagnostic triage and recommendations.`,
       suggestedService: null,
     },
   ]);

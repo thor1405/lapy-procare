@@ -9,7 +9,10 @@ import confetti from 'canvas-confetti';
 import {
   Laptop,
   Monitor,
+  Smartphone,
   Gamepad2,
+  Cpu,
+  Home,
   Wrench,
   CheckCircle2,
   Clock,
@@ -17,28 +20,80 @@ import {
   ArrowRight,
   ArrowLeft,
   MapPin,
+  Sparkles,
 } from 'lucide-react';
 
 const DEVICE_OPTIONS = [
-  { id: 'Laptop', label: 'Laptop', icon: Laptop, desc: 'Notebooks, MacBooks, Ultrabooks' },
-  { id: 'Desktop', label: 'Desktop Tower', icon: Monitor, desc: 'Custom PCs, All-in-Ones, Towers' },
-  { id: 'Gaming PC', label: 'Gaming Rig', icon: Gamepad2, desc: 'High-end gaming battle stations' },
-  { id: 'Other', label: 'Other IT Equipment', icon: Wrench, desc: 'Servers, CCTV NVRs, Network gear' },
+  { id: 'Laptop', label: 'Computer & Laptop', icon: Laptop, desc: 'Laptops, MacBooks, Desktops & All-in-Ones' },
+  { id: 'Mobile / Smartphone', label: 'Mobile & Smartphone', icon: Smartphone, desc: 'iPhone, Samsung, OnePlus, Android' },
+  { id: 'Gaming Console', label: 'Gaming Console', icon: Gamepad2, desc: 'PlayStation 5 / PS4, Xbox, Nintendo Switch' },
+  { id: 'Gaming PC', label: 'Custom Gaming Rig', icon: Cpu, desc: 'High-end battle stations & workstations' },
+  { id: 'Other', label: 'Other IT Equipment', icon: Wrench, desc: 'Home Wi-Fi, CCTV, Peripherals & Gear' },
 ];
 
-const PROBLEM_CATEGORIES = [
-  'Device not turning on',
-  'Slow performance & freezing',
-  'Display or screen problems',
-  'Keyboard or trackpad issues',
-  'Battery & charging problems',
-  'Overheating & fan noise',
-  'Operating system & boot crashes',
-  'Virus or malware concerns',
-  'Storage & SSD upgrade request',
-  'Network & Wi-Fi problems',
-  'Other hardware/software fault',
-];
+const PROBLEM_CATEGORIES_MAP = {
+  'Laptop': [
+    'Device not turning on / Power issue',
+    'Display or cracked screen problems',
+    'Slow performance & SSD/RAM upgrade',
+    'Battery not holding charge / Adapter issue',
+    'Overheating, loud fan noise & thermal service',
+    'Liquid spill & water damage recovery',
+    'Keyboard, hinge or trackpad physical damage',
+    'Operating system, blue screen (BSOD) or boot loop',
+    'Virus, malware or data recovery request',
+    'Other hardware/software fault',
+  ],
+  'Mobile / Smartphone': [
+    'Cracked screen / OLED touch display lines',
+    'Battery health degradation / draining quickly',
+    'Charging port loose / not taking charge',
+    'Liquid / water splash damage',
+    'Rear back glass / camera lens broken',
+    'Speaker, earpiece or microphone issue',
+    'Logic board micro-soldering / stuck on logo',
+    'Buttons (power/volume) unresponsive',
+    'Data recovery / software reload',
+    'Other smartphone problem',
+  ],
+  'Gaming Console': [
+    'HDMI 2.1 port broken / No video signal on TV',
+    'Overheating / Loud fan noise / Sudden game shutdown',
+    'Liquid metal & deep thermal heat-sink overhaul',
+    'Disc drive not reading or ejecting game discs',
+    'Power supply failure (PSU) / won\'t power on',
+    'Controller stick drift / buttons sticking',
+    'Storage expansion (NVMe SSD M.2 installation)',
+    'System software error (CE error code) / update loop',
+    'Other console / accessory issue',
+  ],
+  'Gaming PC': [
+    'PC turns on but no display / black screen',
+    'Random freezing, crashing or blue screens under load',
+    'High CPU/GPU temperatures / thermal throttling',
+    'AIO liquid cooler gurgling or pump failure',
+    'Power supply (PSU) tripping or burning smell',
+    'Graphics card artifacting / driver crashes',
+    'Custom loop maintenance / coolant flush',
+    'Component upgrade (GPU / CPU / RAM / M.2 SSD)',
+    'Other gaming PC hardware fault',
+  ],
+  'Other': [
+    'Home Wi-Fi / Router setup & dead zone fixes',
+    'CCTV camera surveillance & NVR configuration',
+    'Peripheral repair (monitor, mechanical keyboard)',
+    'On-site office IT setup / structured cabling',
+    'General tech diagnosis & troubleshooting',
+  ],
+};
+
+const POPULAR_BRANDS = {
+  'Laptop': ['Dell', 'HP', 'Lenovo', 'Apple (MacBook)', 'ASUS', 'Acer', 'MSI', 'Samsung'],
+  'Mobile / Smartphone': ['Apple (iPhone)', 'Samsung', 'OnePlus', 'Google Pixel', 'Xiaomi', 'Vivo', 'Oppo', 'Realme', 'Nothing'],
+  'Gaming Console': ['Sony PlayStation 5', 'PlayStation 4 Pro / Slim', 'Xbox Series X', 'Xbox Series S', 'Xbox One', 'Nintendo Switch OLED', 'Nintendo Switch Lite', 'Steam Deck'],
+  'Gaming PC': ['Custom Assembled Rig', 'ASUS ROG', 'MSI', 'Alienware / Dell', 'HP Omen', 'Lenovo Legion', 'Corsair', 'NZXT'],
+  'Other': ['Hikvision', 'CP Plus', 'TP-Link', 'Netgear', 'D-Link', 'Logitech', 'Other'],
+};
 
 export const BookRepair = () => {
   const navigate = useNavigate();
@@ -289,8 +344,33 @@ export const BookRepair = () => {
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-bold text-[#111827] mb-1">Tell us about your {device.deviceType}</h2>
-              <p className="text-xs text-[#64748B]">This helps us check spare parts availability before your visit.</p>
+              <p className="text-xs text-[#64748B]">This helps us check spare parts availability before your service visit.</p>
             </div>
+
+            {/* Popular Brand Quick Selector */}
+            {POPULAR_BRANDS[device.deviceType] && (
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-[#475569]">
+                  Popular Brands (Click to autofill)
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {POPULAR_BRANDS[device.deviceType].map((b) => (
+                    <button
+                      key={b}
+                      type="button"
+                      onClick={() => setDevice({ ...device, brand: b })}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                        device.brand === b
+                          ? 'bg-indigo-50 border-[#4F46E5] text-[#4F46E5] font-bold'
+                          : 'bg-slate-50 border-slate-200 text-[#475569] hover:border-indigo-300 hover:text-[#111827]'
+                      }`}
+                    >
+                      {b}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -302,7 +382,7 @@ export const BookRepair = () => {
                     type="text"
                     value={device.brand}
                     onChange={(e) => setDevice({ ...device, brand: e.target.value })}
-                    placeholder="e.g. Dell, Lenovo, HP, Apple"
+                    placeholder="e.g. Apple, Dell, Sony, Samsung, Lenovo"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-[#111827] placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all"
                     required
                   />
@@ -315,7 +395,13 @@ export const BookRepair = () => {
                     type="text"
                     value={device.model}
                     onChange={(e) => setDevice({ ...device, model: e.target.value })}
-                    placeholder="e.g. Inspiron 15 3511 or Legion 5"
+                    placeholder={
+                      device.deviceType === 'Mobile / Smartphone'
+                        ? 'e.g. iPhone 15 Pro Max or Galaxy S24'
+                        : device.deviceType === 'Gaming Console'
+                        ? 'e.g. PS5 Disc Edition or Xbox Series X'
+                        : 'e.g. Inspiron 15, MacBook Air M2, Legion 5'
+                    }
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-[#111827] placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all"
                     required
                   />
@@ -325,13 +411,13 @@ export const BookRepair = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-[#475569] mb-1.5">
-                    Serial Number (Optional)
+                    Serial Number / IMEI (Optional)
                   </label>
                   <input
                     type="text"
                     value={device.serialNumber}
                     onChange={(e) => setDevice({ ...device, serialNumber: e.target.value })}
-                    placeholder="Found on underside sticker"
+                    placeholder="Found on underside sticker or device settings"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-[#111827] placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all"
                   />
                 </div>
@@ -345,7 +431,7 @@ export const BookRepair = () => {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-[#111827] focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all"
                   >
                     <option value="">Select age range</option>
-                    <option value="Under 1 year">Under 1 year (In OEM Warranty)</option>
+                    <option value="Under 1 year">Under 1 year (In Warranty)</option>
                     <option value="1 - 3 years">1 - 3 years old</option>
                     <option value="3 - 5 years">3 - 5 years old</option>
                     <option value="Over 5 years">Over 5 years old</option>
@@ -361,7 +447,7 @@ export const BookRepair = () => {
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-bold text-[#111827] mb-1">What seems to be the problem?</h2>
-              <p className="text-xs text-[#64748B]">Select the primary symptom category.</p>
+              <p className="text-xs text-[#64748B]">Select the primary symptom category for your {device.deviceType}.</p>
             </div>
 
             <div className="space-y-4">
@@ -370,7 +456,7 @@ export const BookRepair = () => {
                   Category *
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
-                  {PROBLEM_CATEGORIES.map((cat) => (
+                  {(PROBLEM_CATEGORIES_MAP[device.deviceType] || PROBLEM_CATEGORIES_MAP['Laptop']).map((cat) => (
                     <button
                       key={cat}
                       type="button"
@@ -395,7 +481,7 @@ export const BookRepair = () => {
                   value={problem.description}
                   onChange={(e) => setProblem({ ...problem, description: e.target.value })}
                   rows={4}
-                  placeholder="Describe when the issue started, whether there was physical or liquid contact, strange beep codes or error messages..."
+                  placeholder="Describe when the issue started, whether there was physical or liquid contact, strange error codes or noises..."
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-[#111827] placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all resize-none"
                   required
                 />
@@ -459,40 +545,53 @@ export const BookRepair = () => {
         {step === 5 && (
           <div className="space-y-6">
             <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold border border-teal-200 mb-2">
+                <Home className="w-3.5 h-3.5 text-teal-600" />
+                <span>Home Service Available Across Mangaluru</span>
+              </div>
               <h2 className="text-xl font-bold text-[#111827] mb-1">Service Preference</h2>
               <p className="text-xs text-[#64748B]">
-                Choose whether you will drop off the computer or request doorstep service.
+                Choose whether you'd like our certified technician to visit your home/office or prefer dropping off at our Vamanjoor lab.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div
-                onClick={() => setServicePreference('Drop off at service center')}
-                className={`p-5 rounded-2xl border cursor-pointer transition-all ${
-                  servicePreference === 'Drop off at service center'
-                    ? 'bg-indigo-50/70 border-[#4F46E5] ring-2 ring-indigo-200 shadow-sm'
-                    : 'bg-slate-50/60 border-slate-200 hover:border-indigo-300'
+                onClick={() => setServicePreference('Request doorstep service')}
+                className={`p-5 rounded-2xl border cursor-pointer transition-all relative overflow-hidden ${
+                  servicePreference === 'Request doorstep service'
+                    ? 'bg-teal-50/70 border-teal-500 ring-2 ring-teal-200 shadow-sm'
+                    : 'bg-slate-50/60 border-slate-200 hover:border-teal-300 hover:bg-slate-50'
                 }`}
               >
-                <MapPin className="w-6 h-6 text-[#4F46E5] mb-2" />
-                <h3 className="text-sm font-bold text-[#111827]">Drop off at Service Center</h3>
-                <p className="text-xs text-[#64748B] mt-1">
-                  Near St. Joseph Engineering College, Vamanjoor, Mangaluru. Free parking available.
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-teal-100/70 text-teal-700 flex items-center justify-center">
+                    <Home className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-600 text-white uppercase tracking-wider">
+                    Recommended
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-[#111827]">Home / Doorstep Service</h3>
+                <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
+                  Technician visits your home or office in Mangaluru for on-site diagnosis and repair, or arranges complimentary safe lab transit.
                 </p>
               </div>
 
               <div
-                onClick={() => setServicePreference('Request doorstep service')}
+                onClick={() => setServicePreference('Drop off at service center')}
                 className={`p-5 rounded-2xl border cursor-pointer transition-all ${
-                  servicePreference === 'Request doorstep service'
+                  servicePreference === 'Drop off at service center'
                     ? 'bg-indigo-50/70 border-[#4F46E5] ring-2 ring-indigo-200 shadow-sm'
-                    : 'bg-slate-50/60 border-slate-200 hover:border-indigo-300'
+                    : 'bg-slate-50/60 border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
                 }`}
               >
-                <Wrench className="w-6 h-6 text-[#4F46E5] mb-2" />
-                <h3 className="text-sm font-bold text-[#111827]">Request Doorstep Service</h3>
-                <p className="text-xs text-[#64748B] mt-1">
-                  Technician visits your home/office in Mangaluru (subject to availability).
+                <div className="w-10 h-10 rounded-xl bg-indigo-100/70 text-[#4F46E5] flex items-center justify-center mb-2">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <h3 className="text-sm font-bold text-[#111827]">Drop off at Service Center</h3>
+                <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
+                  Near St. Joseph Engineering College, Vamanjoor, Mangaluru. Free parking and direct bench intake.
                 </p>
               </div>
             </div>
