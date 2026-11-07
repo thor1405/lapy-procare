@@ -43,9 +43,11 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Logo & Wordmark */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#4F46E5] via-[#3B82F6] to-[#14B8A6] flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-all">
-            <Cpu className="w-5 h-5 text-white" />
-          </div>
+          <img
+            src="/favicon.svg"
+            alt="Lapy Procare Logo"
+            className="w-10 h-10 rounded-xl object-contain shadow-md shadow-indigo-500/15 group-hover:scale-105 transition-all"
+          />
           <div>
             <span className="font-extrabold text-xl tracking-tight text-[#111827] flex items-center gap-1.5 font-['Sora']">
               LAPY <span className="text-[#4F46E5]">PROCARE</span>

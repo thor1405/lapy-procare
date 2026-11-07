@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient (Deep Navy Studio Backdrop) -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070D1E" />
+      <stop offset="50%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </linearGradient>
+
+    <!-- Electric Cyan to Royal Blue Swoosh Gradient -->
+    <linearGradient id="swooshGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="30%" stop-color="#00C0FF" />
+      <stop offset="70%" stop-color="#0070F3" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+
+    <!-- Laptop Frame Gradient -->
+    <linearGradient id="laptopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+
+    <!-- Tools Silver-Cyan Gradient -->
+    <linearGradient id="toolGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="50%" stop-color="#E0F2FE" />
+      <stop offset="100%" stop-color="#7DD3FC" />
+    </linearGradient>
+
+    <!-- Subtle Tech Glow Filter -->
+    <filter id="cyanGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- 1. Background Rounded Squircle Tile -->
+  <rect width="512" height="512" rx="124" fill="url(#bgGrad)" />
+  <rect width="504" height="504" x="4" y="4" rx="120" stroke="url(#swooshGrad)" stroke-width="4" stroke-opacity="0.35" fill="none" />
+
+  <!-- 2. Ambient Tech Glow behind Laptop -->
+  <circle cx="260" cy="256" r="170" fill="#0284C7" opacity="0.14" />
+  <circle cx="240" cy="240" r="110" fill="#00F0FF" opacity="0.10" />
+
+  <!-- 3. Dynamic Orbit Swoosh (Loops from bottom under base, sweeps around left, and arcs over top) -->
+  <!-- Outer Swoosh Arc -->
+  <path d="M 125 380 C 65 335 42 245 72 175 C 98 115 155 72 235 70 C 260 69 285 75 305 82 C 270 87 235 93 195 110 C 135 136 96 190 92 252 C 88 308 112 355 156 382 C 145 383 135 382 125 380 Z" fill="url(#swooshGrad)" filter="url(#cyanGlow)" />
+  <!-- Accent Inner Swoosh Core -->
+  <path d="M 85 355 C 56 295 62 205 112 145 C 148 102 212 75 285 78 C 232 90 178 122 138 172 C 100 220 90 282 118 338 C 106 345 95 350 85 355 Z" fill="#00F0FF" opacity="0.85" />
+  <!-- Swoosh Under Base Trail -->
+  <path d="M 75 372 C 120 422 215 444 315 424 C 368 413 412 388 438 358 C 424 372 380 398 322 410 C 228 424 148 408 100 370 C 90 370 82 371 75 372 Z" fill="url(#swooshGrad)" />
+
+  <!-- 4. Laptop Display Screen Frame (Bezel) -->
+  <rect x="156" y="122" width="232" height="162" rx="16" fill="#0A1128" stroke="url(#laptopGrad)" stroke-width="14" />
+  
+  <!-- Screen Glass Surface -->
+  <rect x="170" y="136" width="204" height="134" rx="8" fill="#040814" />
+  <rect x="174" y="140" width="196" height="126" rx="6" fill="#09142A" stroke="#0284C7" stroke-width="2" stroke-opacity="0.4" />
+
+  <!-- 5. Crossed Repair Tools inside Laptop Display -->
+  <!-- Tool 1: Screwdriver (Rotated +45 deg) -->
+  <g transform="translate(272, 203) rotate(45)">
+    <!-- Steel Shaft -->
+    <rect x="-6" y="-46" width="12" height="62" rx="3" fill="url(#toolGrad)" />
+    <!-- Screwdriver Flat Tip -->
+    <path d="M -5 -46 L -2 -58 L 2 -58 L 5 -46 Z" fill="#38BDF8" />
+    <!-- Handle with Grip Ribs -->
+    <rect x="-10" y="16" width="20" height="38" rx="6" fill="url(#laptopGrad)" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.6" />
+    <line x1="-10" y1="28" x2="10" y2="28" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.7" />
+    <line x1="-10" y1="40" x2="10" y2="40" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.7" />
+  </g>
+
+  <!-- Tool 2: Wrench (Rotated -45 deg) -->
+  <g transform="translate(272, 203) rotate(-45)">
+    <!-- Wrench Shaft -->
+    <rect x="-7" y="-36" width="14" height="76" rx="4" fill="url(#swooshGrad)" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.8" />
+    <!-- Open Head (Top) -->
+    <path d="M -18 -36 C -18 -52 -4 -62 10 -58 C 18 -55 24 -48 24 -36 C 24 -32 20 -28 15 -28 C 8 -28 6 -35 0 -38 C -6 -41 -12 -38 -12 -30 C -12 -26 -16 -26 -18 -36 Z" fill="url(#swooshGrad)" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.9" />
+    <!-- Closed Ring Head (Bottom) -->
+    <circle cx="0" cy="44" r="16" fill="url(#swooshGrad)" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.9" />
+    <circle cx="0" cy="44" r="7" fill="#09142A" />
+  </g>
+
+  <!-- Center Tool Joint Highlight -->
+  <circle cx="272" cy="203" r="5" fill="#FFFFFF" opacity="0.9" />
+
+  <!-- 6. Laptop Base / Keyboard Deck -->
+  <path d="M 115 310 L 140 284 L 404 284 L 429 310 C 435 316 430 324 420 324 L 124 324 C 114 324 109 316 115 310 Z" fill="url(#laptopGrad)" stroke="#38BDF8" stroke-width="3" />
+  
+  <!-- Base Bevel & Trackpad Notch -->
+  <path d="M 124 324 L 420 324 L 415 334 C 412 338 406 340 400 340 L 144 340 C 138 340 132 338 129 334 Z" fill="#0369A1" />
+  <!-- Center Notch Accent -->
+  <rect x="242" y="287" width="60" height="7" rx="3" fill="#070D1E" />
+</svg>

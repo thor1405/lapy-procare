@@ -48,9 +48,11 @@ export const AdminLayout = () => {
           {/* Brand */}
           <div className="p-6 border-b border-[#E2E8F0] flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#4F46E5] via-[#3B82F6] to-[#14B8A6] flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
+              <img
+                src="/favicon.svg"
+                alt="Lapy Procare Logo"
+                className="w-9 h-9 rounded-xl object-contain shadow-md shadow-indigo-500/15"
+              />
               <span className="font-extrabold text-base tracking-tight text-[#111827] font-['Sora']">
                 ADMIN <span className="text-[#4F46E5]">SUITE</span>
               </span>
