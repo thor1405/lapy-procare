@@ -67,8 +67,8 @@ export const generateDocumentPDF = (type, data, resStream) => {
   doc.text('DESCRIPTION / PART', 80, tableTop + 7);
   doc.text('TYPE', 310, tableTop + 7);
   doc.text('QTY', 370, tableTop + 7);
-  doc.text('RATE (₹)', 420, tableTop + 7);
-  doc.text('AMOUNT (₹)', 485, tableTop + 7);
+  doc.text('RATE (Rs.)', 420, tableTop + 7);
+  doc.text('AMOUNT (Rs.)', 485, tableTop + 7);
 
   // Items Rows
   let y = tableTop + 24;
@@ -93,31 +93,37 @@ export const generateDocumentPDF = (type, data, resStream) => {
   y += 15;
 
   // Totals Section
-  const totalsLeft = 360;
+  const totalsLeft = 350;
   doc.fontSize(9).font('Helvetica').fillColor('#475569');
   doc.text('Labour Charges:', totalsLeft, y);
-  doc.text(`₹${Number(data.labourCharges || 0).toLocaleString('en-IN')}`, 490, y);
+  doc.text(`Rs. ${Number(data.labourCharges || 0).toLocaleString('en-IN')}`, 470, y);
   y += 16;
 
   doc.text('Spare Parts Total:', totalsLeft, y);
-  doc.text(`₹${Number(data.sparePartCharges || 0).toLocaleString('en-IN')}`, 490, y);
+  doc.text(`Rs. ${Number(data.sparePartCharges || 0).toLocaleString('en-IN')}`, 470, y);
   y += 16;
+
+  if (data.additionalCharges > 0) {
+    doc.text('Additional Charges:', totalsLeft, y);
+    doc.text(`Rs. ${Number(data.additionalCharges).toLocaleString('en-IN')}`, 470, y);
+    y += 16;
+  }
 
   if (data.discount > 0) {
     doc.text('Special Discount:', totalsLeft, y);
-    doc.text(`- ₹${Number(data.discount).toLocaleString('en-IN')}`, 490, y);
+    doc.text(`- Rs. ${Number(data.discount).toLocaleString('en-IN')}`, 470, y);
     y += 16;
   }
 
   doc.text(`GST Tax (${data.taxRate || 18}%):`, totalsLeft, y);
-  doc.text(`₹${Number(data.taxAmount || 0).toLocaleString('en-IN')}`, 490, y);
+  doc.text(`Rs. ${Number(data.taxAmount || 0).toLocaleString('en-IN')}`, 470, y);
   y += 20;
 
   // Grand Total Highlight Bar
-  doc.rect(totalsLeft - 10, y, 205, 28).fill('#007BFF');
+  doc.rect(totalsLeft - 10, y, 215, 28).fill('#007BFF');
   doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(11);
   doc.text('GRAND TOTAL:', totalsLeft, y + 8);
-  doc.text(`₹${Number(data.totalAmount || 0).toLocaleString('en-IN')}`, 470, y + 8);
+  doc.text(`Rs. ${Number(data.totalAmount || 0).toLocaleString('en-IN')}`, 450, y + 8);
   y += 45;
 
   // Diagnosis / Notes
