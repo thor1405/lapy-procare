@@ -109,33 +109,6 @@ export const Login = () => {
               Sign In
             </Button>
           </form>
-
-          {/* Demo Credentials Quick-Fill Pill Helper */}
-          <div className="mt-6 pt-5 border-t border-slate-100 text-[11px] text-[#64748B] space-y-2 bg-slate-50/80 p-3.5 rounded-xl border border-slate-200">
-            <span className="font-semibold text-[#111827] block">Quick Demo Logins:</span>
-            <div className="flex flex-wrap gap-2 pt-0.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('admin@lapyprocare.com');
-                  setPassword('Admin@Lapy2026!');
-                }}
-                className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 font-medium transition-colors"
-              >
-                Admin & Lead Tech
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('customer@gmail.com');
-                  setPassword('Customer@123');
-                }}
-                className="px-2.5 py-1 rounded-lg bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 font-medium transition-colors"
-              >
-                Customer
-              </button>
-            </div>
-          </div>
         </Card>
 
         <p className="text-center text-xs text-[#64748B]">
