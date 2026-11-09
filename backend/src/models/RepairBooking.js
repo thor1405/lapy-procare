@@ -33,6 +33,8 @@ const repairBookingSchema = new mongoose.Schema(
       model: { type: String, required: true, trim: true },
       serialNumber: { type: String, trim: true, default: '' },
       deviceAge: { type: String, default: '' },
+      passcode: { type: String, default: '' },
+      accessories: [{ type: String }],
     },
     problem: {
       category: { type: String, required: true },

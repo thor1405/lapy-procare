@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import {
   LayoutDashboard,
   CalendarCheck,
+  PlusCircle,
   FileCheck2,
   Receipt,
   Boxes,
@@ -32,6 +33,7 @@ export const AdminLayout = () => {
   const navItems = [
     { name: 'Analytics & KPIs', path: '/admin', icon: LayoutDashboard },
     { name: 'Repair Bookings', path: '/admin/bookings', icon: CalendarCheck },
+    { name: '➕ New Offline Ticket', path: '/admin/bookings/new', icon: PlusCircle },
     { name: 'Quotations', path: '/admin/quotations', icon: FileCheck2 },
     { name: 'Invoices & Billing', path: '/admin/invoices', icon: Receipt },
     { name: 'Inventory & Parts', path: '/admin/inventory', icon: Boxes },

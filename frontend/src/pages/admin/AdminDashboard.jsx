@@ -26,6 +26,7 @@ import {
   CalendarCheck,
   TrendingUp,
   ArrowRight,
+  Plus,
 } from 'lucide-react';
 
 const COLORS = ['#4F46E5', '#3B82F6', '#14B8A6', '#8B5CF6', '#F59E0B', '#EC4899'];
@@ -77,9 +78,36 @@ export const AdminDashboard = () => {
             Real-time business performance derived from verified database transactions.
           </p>
         </div>
-        <Link to="/admin/bookings">
-          <Button size="sm" icon={CalendarCheck}>
-            Manage All Bookings
+        <div className="flex flex-wrap items-center gap-2">
+          <Link to="/admin/bookings/new">
+            <Button size="sm" variant="primary" icon={Plus}>
+              New Offline Ticket
+            </Button>
+          </Link>
+          <Link to="/admin/bookings">
+            <Button size="sm" variant="outline" icon={CalendarCheck}>
+              Manage All Bookings
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Quick Action Walk-in Banner */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-teal-500/10 border border-indigo-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
+            <Plus className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 text-sm">Walk-in Customer at Counter?</h3>
+            <p className="text-xs text-slate-600">
+              Create an offline ticket manually, add parts & service costs, and generate/print an instant bill.
+            </p>
+          </div>
+        </div>
+        <Link to="/admin/bookings/new" className="shrink-0">
+          <Button size="sm" variant="primary" icon={Plus}>
+            Create Offline Ticket & Bill
           </Button>
         </Link>
       </div>

@@ -118,4 +118,74 @@ describe('Authentication & RBAC Security Tests', () => {
     const res = await request(app).get('/api/v1/bookings/my');
     expect(res.status).toBe(401);
   });
+
+  it('Admin can manually create an offline ticket and prepare a bill for walk-in customer', async () => {
+    const offlinePayload = {
+      customer: {
+        name: 'Ramesh Walkin',
+        phone: '+91 9900112233',
+        email: 'ramesh.walkin@example.com',
+        address: { street: 'Vamanjoor Junction', city: 'Mangaluru', postalCode: '575028' },
+      },
+      device: {
+        deviceType: 'Laptop',
+        brand: 'Dell',
+        model: 'Inspiron 15 3520',
+        serialNumber: 'DELL-WALKIN-001',
+        passcode: '1234',
+        accessories: ['Charger / Power Adapter'],
+      },
+      problem: {
+        category: 'Display & Screen Replacement',
+        description: 'Flickering vertical lines and battery health down.',
+      },
+      priority: 'Normal',
+      billing: {
+        prepareBillNow: true,
+        items: [
+          { description: '15.6 FHD LED IPS Screen', itemType: 'Spare Part', quantity: 1, unitPrice: 3800, amount: 3800 },
+          { description: 'Screen Fitment & Labor', itemType: 'Labour', quantity: 1, unitPrice: 500, amount: 500 },
+        ],
+        labourCharges: 500,
+        sparePartCharges: 3800,
+        discount: 300,
+        taxRate: 0,
+        paymentMethod: 'Cash',
+        amountPaid: 4000,
+      },
+    };
+
+    const res = await request(app)
+      .post('/api/v1/admin/bookings/offline')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(offlinePayload);
+
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.booking).toBeDefined();
+    expect(res.body.data.booking.ticketId).toMatch(/^LPC-\d{4}-\d{6}$/);
+    expect(res.body.data.booking.status).toBe('Device Received');
+    expect(res.body.data.booking.device.brand).toBe('Dell');
+    expect(res.body.data.booking.device.passcode).toBe('1234');
+    expect(res.body.data.invoice).toBeDefined();
+    expect(res.body.data.invoice.invoiceNumber).toMatch(/^INV-\d{4}-\d{6}$/);
+    expect(res.body.data.invoice.totalAmount).toBe(4000);
+    expect(res.body.data.invoice.amountPaid).toBe(4000);
+    expect(res.body.data.invoice.balanceDue).toBe(0);
+    expect(res.body.data.invoice.paymentStatus).toBe('Paid');
+  });
+
+  it('GET /api/v1/admin/bookings retrieves bookings enriched with invoice metadata', async () => {
+    const res = await request(app)
+      .get('/api/v1/admin/bookings?search=Inspiron')
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.bookings.length).toBeGreaterThanOrEqual(1);
+    const walkinBooking = res.body.data.bookings.find((b) => b.device?.model === 'Inspiron 15 3520');
+    expect(walkinBooking).toBeDefined();
+    expect(walkinBooking.invoice).toBeDefined();
+    expect(walkinBooking.invoice.totalAmount).toBe(4000);
+  });
 });

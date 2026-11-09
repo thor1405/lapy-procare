@@ -34,6 +34,7 @@ import { CustomerProfile } from '../pages/customer/CustomerProfile';
 // Admin Suite Pages
 import { AdminDashboard } from '../pages/admin/AdminDashboard';
 import { AdminBookings } from '../pages/admin/AdminBookings';
+import { AdminNewTicket } from '../pages/admin/AdminNewTicket';
 import { AdminQuotations } from '../pages/admin/AdminQuotations';
 import { AdminInvoices } from '../pages/admin/AdminInvoices';
 import { AdminInventory } from '../pages/admin/AdminInventory';
@@ -91,6 +92,7 @@ export const AppRoutes = () => {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="bookings" element={<AdminBookings />} />
+        <Route path="bookings/new" element={<AdminNewTicket />} />
         <Route path="quotations" element={<AdminQuotations />} />
         <Route path="invoices" element={<AdminInvoices />} />
         <Route path="inventory" element={<AdminInventory />} />

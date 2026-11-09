@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
 import { Modal } from '../../components/Modal';
 import { Skeleton } from '../../components/Skeleton';
+import { PrintableBillModal } from '../../components/PrintableBillModal';
 import api from '../../api/client';
 import { toast } from 'sonner';
 import {
@@ -13,6 +14,9 @@ import {
   Edit3,
   MessageSquare,
   Wrench,
+  Plus,
+  Receipt,
+  Trash2,
 } from 'lucide-react';
 
 const STATUS_OPTIONS = [
@@ -44,6 +48,9 @@ export const AdminBookings = () => {
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [billModalOpen, setBillModalOpen] = useState(false);
+  const [activeInvoice, setActiveInvoice] = useState(null);
+  const [prepareBillModalOpen, setPrepareBillModalOpen] = useState(false);
 
   const [selectedBooking, setSelectedBooking] = useState(null);
 
@@ -54,6 +61,112 @@ export const AdminBookings = () => {
   const [customNote, setCustomNote] = useState('');
   const [isInternalNote, setIsInternalNote] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Prepare Bill Form State
+  const [billItems, setBillItems] = useState([
+    { description: 'Device Servicing & Hardware Diagnostics', itemType: 'Service', quantity: 1, unitPrice: 499, amount: 499 },
+  ]);
+  const [billLabour, setBillLabour] = useState(499);
+  const [billSpareParts, setBillSpareParts] = useState(0);
+  const [billAdditional, setBillAdditional] = useState(0);
+  const [billDiscount, setBillDiscount] = useState(0);
+  const [billTaxRate, setBillTaxRate] = useState(0);
+  const [billPaymentMethod, setBillPaymentMethod] = useState('Cash');
+  const [billAmountPaid, setBillAmountPaid] = useState(499);
+  const [billPaymentReference, setBillPaymentReference] = useState('');
+  const [isSubmittingBill, setIsSubmittingBill] = useState(false);
+
+  const openPrepareBillModal = (booking) => {
+    setSelectedBooking(booking);
+    if (booking.invoice) {
+      setActiveInvoice(booking.invoice);
+      setBillModalOpen(true);
+      return;
+    }
+    setBillItems([
+      { description: `${booking.device?.brand || ''} ${booking.device?.model || ''} - Repair Service`, itemType: 'Service', quantity: 1, unitPrice: 499, amount: 499 },
+    ]);
+    setBillLabour(499);
+    setBillSpareParts(0);
+    setBillAdditional(0);
+    setBillDiscount(0);
+    setBillTaxRate(0);
+    setBillPaymentMethod('Cash');
+    setBillAmountPaid(499);
+    setBillPaymentReference('');
+    setPrepareBillModalOpen(true);
+  };
+
+  const handleAddBillItem = () => {
+    setBillItems([
+      ...billItems,
+      { description: '', itemType: 'Spare Part', quantity: 1, unitPrice: 0, amount: 0 },
+    ]);
+  };
+
+  const handleBillItemChange = (index, field, value) => {
+    const updated = [...billItems];
+    updated[index][field] = value;
+    if (field === 'quantity' || field === 'unitPrice') {
+      const q = Number(updated[index].quantity || 1);
+      const p = Number(updated[index].unitPrice || 0);
+      updated[index].amount = q * p;
+    }
+    setBillItems(updated);
+    const spareTotal = updated
+      .filter((it) => it.itemType === 'Spare Part')
+      .reduce((sum, it) => sum + Number(it.amount || 0), 0);
+    setBillSpareParts(spareTotal);
+  };
+
+  const handleRemoveBillItem = (index) => {
+    const updated = billItems.filter((_, i) => i !== index);
+    setBillItems(updated);
+    const spareTotal = updated
+      .filter((it) => it.itemType === 'Spare Part')
+      .reduce((sum, it) => sum + Number(it.amount || 0), 0);
+    setBillSpareParts(spareTotal);
+  };
+
+  const billSubtotal = Math.max(
+    0,
+    Number(billLabour || 0) + Number(billSpareParts || 0) + Number(billAdditional || 0) - Number(billDiscount || 0)
+  );
+  const billTaxAmount = Math.round((billSubtotal * Number(billTaxRate || 0)) / 100);
+  const billGrandTotal = Math.max(0, billSubtotal + billTaxAmount);
+  const billBalanceDue = Math.max(0, billGrandTotal - Number(billAmountPaid || 0));
+
+  const handleSaveBill = async (e) => {
+    e.preventDefault();
+    if (!selectedBooking) return;
+    setIsSubmittingBill(true);
+
+    try {
+      const res = await api.post('/admin/invoices', {
+        ticketId: selectedBooking.ticketId,
+        items: billItems,
+        labourCharges: Number(billLabour || 0),
+        sparePartCharges: Number(billSpareParts || 0),
+        additionalCharges: Number(billAdditional || 0),
+        discount: Number(billDiscount || 0),
+        taxRate: Number(billTaxRate || 0),
+        paymentMethod: billPaymentMethod,
+        amountPaid: Number(billAmountPaid || 0),
+        paymentReference: billPaymentReference,
+        paymentStatus: billBalanceDue <= 0 && billGrandTotal > 0 ? 'Paid' : billAmountPaid > 0 ? 'Partially Paid' : 'Unpaid',
+      });
+      toast.success(`Bill for ticket ${selectedBooking.ticketId} prepared successfully!`);
+      setPrepareBillModalOpen(false);
+      const newInvoice = res.data?.data?.invoice;
+      setActiveInvoice(newInvoice);
+      setBillModalOpen(true);
+      fetchBookings();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to prepare bill');
+    } finally {
+      setIsSubmittingBill(false);
+    }
+  };
 
   const fetchBookings = () => {
     setIsLoading(true);
@@ -153,6 +266,13 @@ export const AdminBookings = () => {
             Dispatch engineers, track workshop stages, and update ticket telemetry.
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <Link to="/admin/bookings/new">
+            <Button size="sm" variant="primary" icon={Plus}>
+              New Offline Ticket
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -241,7 +361,30 @@ export const AdminBookings = () => {
                     <span className="text-[#64748B]">
                       {new Date(b.appointment?.date).toLocaleDateString('en-IN')}
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      {b.invoice ? (
+                        <button
+                          onClick={() => {
+                            setSelectedBooking(b);
+                            setActiveInvoice(b.invoice);
+                            setBillModalOpen(true);
+                          }}
+                          className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200 text-xs flex items-center gap-1"
+                          title="View Bill"
+                        >
+                          <Receipt className="w-3 h-3 text-emerald-600" />
+                          <span>Bill</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => openPrepareBillModal(b)}
+                          className="px-2 py-1 rounded-lg bg-indigo-50 text-[#4F46E5] font-semibold border border-indigo-200 text-xs flex items-center gap-1"
+                          title="Prepare Bill"
+                        >
+                          <Receipt className="w-3 h-3 text-indigo-600" />
+                          <span>Bill</span>
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           setSelectedBooking(b);
@@ -249,7 +392,7 @@ export const AdminBookings = () => {
                           setStatusNote('');
                           setStatusModalOpen(true);
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-indigo-50 text-[#4F46E5] font-semibold border border-indigo-200 text-xs flex items-center gap-1"
+                        className="px-2 py-1 rounded-lg bg-slate-100 text-[#475569] font-semibold border border-slate-200 text-xs flex items-center gap-1"
                       >
                         <Edit3 className="w-3 h-3" />
                         <span>Update</span>
@@ -261,7 +404,7 @@ export const AdminBookings = () => {
                           setIsInternalNote(false);
                           setNoteModalOpen(true);
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-slate-100 text-[#475569] font-semibold border border-slate-200 text-xs flex items-center gap-1"
+                        className="px-2 py-1 rounded-lg bg-slate-100 text-[#475569] font-semibold border border-slate-200 text-xs flex items-center gap-1"
                       >
                         <MessageSquare className="w-3 h-3" />
                         <span>Note</span>
@@ -323,6 +466,33 @@ export const AdminBookings = () => {
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          {b.invoice ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedBooking(b);
+                                setActiveInvoice(b.invoice);
+                                setBillModalOpen(true);
+                              }}
+                              title="View & Print Bill"
+                              className="text-xs py-1 px-2.5 text-emerald-700 border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100 flex items-center gap-1 font-semibold"
+                            >
+                              <Receipt className="w-3.5 h-3.5" />
+                              <span>Bill (₹{b.invoice.totalAmount.toLocaleString('en-IN')})</span>
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openPrepareBillModal(b)}
+                              title="Add Costs & Prepare Bill"
+                              className="text-xs py-1 px-2.5 text-indigo-700 border-indigo-200 bg-indigo-50/60 hover:bg-indigo-100 flex items-center gap-1 font-semibold"
+                            >
+                              <Receipt className="w-3.5 h-3.5" />
+                              <span>Prepare Bill</span>
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -486,6 +656,216 @@ export const AdminBookings = () => {
           </div>
         </div>
       </Modal>
+
+      {/* 4. Prepare Bill Modal */}
+      <Modal
+        isOpen={prepareBillModalOpen}
+        onClose={() => setPrepareBillModalOpen(false)}
+        title={`Prepare Bill: ${selectedBooking?.ticketId} (${selectedBooking?.customer?.name})`}
+        maxWidth="max-w-3xl"
+      >
+        <form onSubmit={handleSaveBill} className="space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <span className="text-xs font-semibold text-slate-700">
+              Repair Line Items (Services & Spare Parts):
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              icon={Plus}
+              onClick={handleAddBillItem}
+              className="text-xs py-1"
+            >
+              Add Item
+            </Button>
+          </div>
+
+          {/* Items List */}
+          <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+            {billItems.map((item, idx) => (
+              <div
+                key={idx}
+                className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-1 sm:grid-cols-12 gap-2 items-center text-xs"
+              >
+                <div className="sm:col-span-5">
+                  <input
+                    type="text"
+                    required
+                    value={item.description}
+                    onChange={(e) => handleBillItemChange(idx, 'description', e.target.value)}
+                    placeholder="Description / Part name"
+                    className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <select
+                    value={item.itemType}
+                    onChange={(e) => handleBillItemChange(idx, 'itemType', e.target.value)}
+                    className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="Service">Service</option>
+                    <option value="Spare Part">Spare Part</option>
+                    <option value="Labour">Labour</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="sm:col-span-1">
+                  <input
+                    type="number"
+                    min="1"
+                    value={item.quantity}
+                    onChange={(e) => handleBillItemChange(idx, 'quantity', e.target.value)}
+                    className="w-full px-1.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-900 font-mono text-center"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <input
+                    type="number"
+                    min="0"
+                    value={item.unitPrice}
+                    onChange={(e) => handleBillItemChange(idx, 'unitPrice', e.target.value)}
+                    className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-slate-900 font-mono text-right"
+                  />
+                </div>
+                <div className="sm:col-span-2 flex items-center justify-between gap-1">
+                  <span className="font-mono font-bold text-slate-900 text-xs">
+                    ₹{Number(item.amount || 0).toLocaleString('en-IN')}
+                  </span>
+                  {billItems.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveBillItem(idx)}
+                      className="p-1 text-slate-400 hover:text-rose-600"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Charges and Totals */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-100 text-xs">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-0.5">Labour (₹)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={billLabour}
+                  onChange={(e) => setBillLabour(e.target.value)}
+                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg font-mono"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-0.5">Spare Parts (₹)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={billSpareParts}
+                  onChange={(e) => setBillSpareParts(e.target.value)}
+                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg font-mono"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-0.5">Discount (₹)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={billDiscount}
+                  onChange={(e) => setBillDiscount(e.target.value)}
+                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg font-mono text-emerald-700"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-0.5">GST Rate</label>
+                <select
+                  value={billTaxRate}
+                  onChange={(e) => setBillTaxRate(Number(e.target.value))}
+                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg font-semibold"
+                >
+                  <option value={0}>0% (No GST)</option>
+                  <option value={18}>18% GST</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+              <div className="space-y-1 text-slate-600">
+                <div className="flex justify-between">
+                  <span>Subtotal:</span>
+                  <span className="font-mono text-slate-900">₹{billSubtotal.toLocaleString('en-IN')}</span>
+                </div>
+                {billTaxAmount > 0 && (
+                  <div className="flex justify-between">
+                    <span>GST ({billTaxRate}%):</span>
+                    <span className="font-mono text-slate-900">₹{billTaxAmount.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center text-sm font-bold text-slate-900 pt-1 border-t border-slate-200">
+                  <span>Grand Total:</span>
+                  <span className="font-mono text-indigo-700">₹{billGrandTotal.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200 grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-700 mb-0.5">Mode</label>
+                  <select
+                    value={billPaymentMethod}
+                    onChange={(e) => setBillPaymentMethod(e.target.value)}
+                    className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg font-semibold text-slate-900"
+                  >
+                    <option value="Cash">Cash</option>
+                    <option value="UPI">UPI (GPay/PhonePe)</option>
+                    <option value="Card">Card</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-700 mb-0.5">Paid (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max={billGrandTotal}
+                    value={billAmountPaid}
+                    onChange={(e) => setBillAmountPaid(e.target.value)}
+                    className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg font-mono font-bold text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center text-[11px] pt-1">
+                <span className="text-slate-600">Balance Due:</span>
+                <span className={`font-mono font-bold ${billBalanceDue > 0 ? 'text-rose-600' : 'text-emerald-700'}`}>
+                  {billBalanceDue > 0 ? `₹${billBalanceDue.toLocaleString('en-IN')}` : 'Settled in Full'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-[#E2E8F0]">
+            <Button variant="ghost" size="sm" type="button" onClick={() => setPrepareBillModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button size="sm" variant="primary" isLoading={isSubmittingBill} type="submit" icon={Receipt}>
+              Save & Generate Bill
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* 5. Printable Bill / Receipt Modal */}
+      {billModalOpen && (
+        <PrintableBillModal
+          isOpen={billModalOpen}
+          onClose={() => setBillModalOpen(false)}
+          invoice={activeInvoice}
+          booking={selectedBooking}
+        />
+      )}
     </div>
   );
 };

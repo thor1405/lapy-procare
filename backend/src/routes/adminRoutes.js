@@ -5,6 +5,7 @@ import {
   updateBookingStatus,
   assignTechnician,
   addBookingNote,
+  createOfflineBooking,
   createQuotation,
   getAllQuotations,
   createInvoice,
@@ -37,6 +38,7 @@ router.get('/bookings', getAllBookings);
 router.patch('/bookings/:ticketId/status', updateBookingStatus);
 router.post('/bookings/:ticketId/assign', assignTechnician);
 router.post('/bookings/:ticketId/notes', addBookingNote);
+router.post('/bookings/offline', createOfflineBooking);
 
 // Quotations
 router.get('/quotations', getAllQuotations);

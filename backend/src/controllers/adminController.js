@@ -11,7 +11,7 @@ import { TechnicianProfile } from '../models/TechnicianProfile.js';
 import { Service } from '../models/Service.js';
 import { BusinessSettings } from '../models/BusinessSettings.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
-import { generateQuotationNumber, generateInvoiceNumber } from '../utils/ticketGenerator.js';
+import { generateTicketId, generateQuotationNumber, generateInvoiceNumber } from '../utils/ticketGenerator.js';
 import { emitStatusUpdate } from '../services/socketService.js';
 import { sendStatusUpdateEmail, sendQuotationEmail, sendInvoiceEmail } from '../services/emailService.js';
 import { REPAIR_STATUS, ROLES, PAYMENT_STATUS, QUOTATION_STATUS } from '../config/constants.js';
@@ -153,8 +153,19 @@ export const getAllBookings = async (req, res, next) => {
       RepairBooking.countDocuments(query),
     ]);
 
+    const ticketIds = bookings.map((b) => b.ticketId);
+    const invoices = await Invoice.find({ ticketId: { $in: ticketIds } });
+    const invoiceMap = new Map();
+    invoices.forEach((inv) => invoiceMap.set(inv.ticketId, inv));
+
+    const enrichedBookings = bookings.map((b) => {
+      const bObj = b.toObject();
+      bObj.invoice = invoiceMap.get(b.ticketId) || null;
+      return bObj;
+    });
+
     return successResponse(res, 'Bookings retrieved', {
-      bookings,
+      bookings: enrichedBookings,
       pagination: {
         total,
         page: Number(page),
@@ -308,6 +319,220 @@ export const addBookingNote = async (req, res, next) => {
 };
 
 // ==========================================
+// 2b. CREATE OFFLINE / WALK-IN REPAIR TICKET
+// ==========================================
+export const createOfflineBooking = async (req, res, next) => {
+  try {
+    const {
+      customer,
+      device,
+      problem,
+      priority = 'Normal',
+      status = REPAIR_STATUS.DEVICE_RECEIVED,
+      assignedTechnician,
+      diagnosticFindings = '',
+      billing,
+    } = req.body;
+
+    if (!customer?.name?.trim() || !customer?.phone?.trim()) {
+      return errorResponse(res, 'Customer name and phone number are required', 400);
+    }
+
+    if (!device?.deviceType || !device?.brand?.trim() || !device?.model?.trim()) {
+      return errorResponse(res, 'Device type, brand, and model are required', 400);
+    }
+
+    if (!problem?.category?.trim() || !problem?.description?.trim()) {
+      return errorResponse(res, 'Problem category and description are required', 400);
+    }
+
+    const cleanPhone = customer.phone.trim();
+    const cleanDigits = cleanPhone.replace(/\D/g, '');
+    const cleanEmail = customer.email?.trim().toLowerCase();
+
+    // 1. Find existing customer or create a new user profile
+    let customerUser = await User.findOne({
+      $or: [
+        { phone: cleanPhone },
+        ...(cleanEmail ? [{ email: cleanEmail }] : []),
+      ],
+    });
+
+    if (!customerUser) {
+      const fallbackEmail = cleanEmail || `walkin.${cleanDigits || Date.now()}@lapyprocare.local`;
+      customerUser = await User.create({
+        name: customer.name.trim(),
+        email: fallbackEmail,
+        phone: cleanPhone,
+        password: `Walkin@${Math.random().toString(36).slice(-6)}!`,
+        role: ROLES.CUSTOMER,
+        isVerified: true,
+        address: {
+          street: customer.address?.street || 'Walk-in Store Intake',
+          city: customer.address?.city || 'Mangaluru',
+          state: 'Karnataka',
+          postalCode: customer.address?.postalCode || '575028',
+        },
+      });
+    } else {
+      if (customer.name && customer.name.trim() !== customerUser.name) {
+        customerUser.name = customer.name.trim();
+      }
+      if (customer.address?.street) {
+        customerUser.address.street = customer.address.street;
+      }
+      await customerUser.save();
+    }
+
+    // 2. Generate unique Ticket ID
+    const ticketId = await generateTicketId();
+
+    // 3. Resolve technician
+    let techId = assignedTechnician || req.user._id;
+    if (techId) {
+      const techExists = await User.findOne({ _id: techId, role: { $in: [ROLES.TECHNICIAN, ROLES.ADMIN] } });
+      if (!techExists) techId = req.user._id;
+    }
+
+    // 4. Create Repair Booking
+    const booking = await RepairBooking.create({
+      ticketId,
+      customer: customerUser._id,
+      device: {
+        deviceType: device.deviceType,
+        brand: device.brand.trim(),
+        model: device.model.trim(),
+        serialNumber: device.serialNumber?.trim() || '',
+        deviceAge: device.deviceAge?.trim() || '',
+        passcode: device.passcode?.trim() || '',
+        accessories: Array.isArray(device.accessories) ? device.accessories : [],
+      },
+      problem: {
+        category: problem.category.trim(),
+        description: problem.description.trim(),
+      },
+      photos: Array.isArray(problem.photos) ? problem.photos : [],
+      servicePreference: 'Drop off at service center',
+      doorstepAddress: {
+        street: customerUser.address?.street || 'In-Store Drop Off',
+        city: customerUser.address?.city || 'Mangaluru',
+        postalCode: customerUser.address?.postalCode || '575028',
+      },
+      appointment: {
+        date: new Date(),
+        timeSlot: 'Walk-in / Immediate Counter',
+      },
+      status: status || REPAIR_STATUS.DEVICE_RECEIVED,
+      assignedTechnician: techId,
+      diagnosticFindings: diagnosticFindings || '',
+      priority: priority || 'Normal',
+      internalNotes: [
+        {
+          note: `Walk-in customer registered at front desk. Intake engineer: ${req.user.name}.`,
+          author: req.user._id,
+          authorName: req.user.name,
+          createdAt: new Date(),
+        },
+      ],
+    });
+
+    // 5. Audit Status History
+    await RepairStatusHistory.create({
+      booking: booking._id,
+      ticketId: booking.ticketId,
+      fromStatus: REPAIR_STATUS.DEVICE_RECEIVED,
+      toStatus: booking.status,
+      note: `Walk-in intake ticket created for ${customerUser.name} (${device.brand} ${device.model})`,
+      changedBy: req.user._id,
+      changedByName: req.user.name,
+    });
+
+    // 6. Optional: Prepare Bill Now
+    let invoice = null;
+    if (billing && billing.prepareBillNow) {
+      const items = Array.isArray(billing.items) ? billing.items : [];
+      const labourCharges = Number(billing.labourCharges || 0);
+      const sparePartCharges = Number(billing.sparePartCharges || 0);
+      const additionalCharges = Number(billing.additionalCharges || 0);
+      const discount = Number(billing.discount || 0);
+      const taxRate = Number(billing.taxRate !== undefined ? billing.taxRate : 0);
+
+      const subtotal = labourCharges + sparePartCharges + additionalCharges - discount;
+      const taxAmount = Math.round((subtotal * taxRate) / 100);
+      const totalAmount = Math.max(0, subtotal + taxAmount);
+
+      const amountPaid = Math.min(totalAmount, Math.max(0, Number(billing.amountPaid || 0)));
+      const balanceDue = Math.max(0, totalAmount - amountPaid);
+      let paymentStatus = billing.paymentStatus || PAYMENT_STATUS.UNPAID;
+      if (amountPaid >= totalAmount && totalAmount > 0) {
+        paymentStatus = PAYMENT_STATUS.PAID;
+      } else if (amountPaid > 0) {
+        paymentStatus = PAYMENT_STATUS.PARTIALLY_PAID;
+      }
+
+      const invoiceNumber = await generateInvoiceNumber();
+      invoice = await Invoice.create({
+        invoiceNumber,
+        booking: booking._id,
+        ticketId: booking.ticketId,
+        customer: customerUser._id,
+        billingDetails: {
+          name: customerUser.name,
+          email: customerUser.email,
+          phone: customerUser.phone,
+          address: `${customerUser.address?.street || 'Walk-in'}, Mangaluru, Karnataka`,
+        },
+        items,
+        labourCharges,
+        sparePartCharges,
+        additionalCharges,
+        discount,
+        taxRate,
+        taxAmount,
+        totalAmount,
+        amountPaid,
+        balanceDue,
+        paymentStatus,
+        paymentMethod: billing.paymentMethod || 'Cash',
+        paymentReference: billing.paymentReference || '',
+        paidAt: amountPaid > 0 ? new Date() : null,
+        terms: billing.terms || 'Thank you for choosing Lapy Procare. All hardware repairs carry a 30-day service warranty.',
+        createdBy: req.user._id,
+      });
+
+      if (amountPaid > 0) {
+        await Payment.create({
+          invoice: invoice._id,
+          customer: customerUser._id,
+          amount: amountPaid,
+          method: billing.paymentMethod || 'Cash',
+          status: PAYMENT_STATUS.PAID,
+          transactionId: billing.paymentReference || `COUNTER-${Date.now()}`,
+          recordedBy: req.user._id,
+        });
+      }
+    }
+
+    const populatedBooking = await RepairBooking.findById(booking._id)
+      .populate('customer', 'name email phone address')
+      .populate('assignedTechnician', 'name phone');
+
+    return successResponse(
+      res,
+      `Walk-in ticket ${ticketId} created successfully`,
+      {
+        booking: populatedBooking,
+        invoice,
+        customer: customerUser,
+      },
+      201
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ==========================================
 // 3. QUOTATIONS MANAGEMENT
 // ==========================================
 export const createQuotation = async (req, res, next) => {
@@ -417,6 +642,10 @@ export const createInvoice = async (req, res, next) => {
       discount = 0,
       taxRate = 18,
       terms,
+      paymentStatus = PAYMENT_STATUS.UNPAID,
+      paymentMethod = 'Cash',
+      amountPaid = 0,
+      paymentReference = '',
     } = req.body;
 
     const booking = await RepairBooking.findOne({ ticketId: ticketId.trim().toUpperCase() })
@@ -430,38 +659,81 @@ export const createInvoice = async (req, res, next) => {
     const taxAmount = Math.round((subtotal * Number(taxRate)) / 100);
     const totalAmount = Math.max(0, subtotal + taxAmount);
 
-    const invoiceNumber = await generateInvoiceNumber();
+    const paidNum = Math.min(totalAmount, Math.max(0, Number(amountPaid) || 0));
+    const balanceDue = Math.max(0, totalAmount - paidNum);
+    let resolvedStatus = paymentStatus;
+    if (paidNum >= totalAmount && totalAmount > 0) {
+      resolvedStatus = PAYMENT_STATUS.PAID;
+    } else if (paidNum > 0) {
+      resolvedStatus = PAYMENT_STATUS.PARTIALLY_PAID;
+    }
 
-    const invoice = await Invoice.create({
-      invoiceNumber,
-      booking: booking._id,
-      ticketId: booking.ticketId,
-      quotation: quotationId || null,
-      customer: booking.customer._id,
-      billingDetails: {
-        name: booking.customer.name,
-        email: booking.customer.email,
-        phone: booking.customer.phone,
-        address: `${booking.doorstepAddress?.street || ''} ${booking.doorstepAddress?.city || 'Mangaluru'}, Karnataka`,
-      },
-      items: items || [],
-      labourCharges,
-      sparePartCharges,
-      additionalCharges,
-      discount,
-      taxRate,
-      taxAmount,
-      totalAmount,
-      amountPaid: 0,
-      balanceDue: totalAmount,
-      paymentStatus: PAYMENT_STATUS.UNPAID,
-      terms: terms || undefined,
-      createdBy: req.user._id,
-    });
+    let invoice = await Invoice.findOne({ ticketId: booking.ticketId });
+    if (invoice) {
+      invoice.items = items || [];
+      invoice.labourCharges = labourCharges;
+      invoice.sparePartCharges = sparePartCharges;
+      invoice.additionalCharges = additionalCharges;
+      invoice.discount = discount;
+      invoice.taxRate = taxRate;
+      invoice.taxAmount = taxAmount;
+      invoice.totalAmount = totalAmount;
+      invoice.amountPaid = paidNum;
+      invoice.balanceDue = balanceDue;
+      invoice.paymentStatus = resolvedStatus;
+      invoice.paymentMethod = paymentMethod;
+      invoice.paymentReference = paymentReference;
+      if (paidNum > 0) invoice.paidAt = new Date();
+      if (terms) invoice.terms = terms;
+      await invoice.save();
+    } else {
+      const invoiceNumber = await generateInvoiceNumber();
+      invoice = await Invoice.create({
+        invoiceNumber,
+        booking: booking._id,
+        ticketId: booking.ticketId,
+        quotation: quotationId || null,
+        customer: booking.customer._id,
+        billingDetails: {
+          name: booking.customer.name,
+          email: booking.customer.email,
+          phone: booking.customer.phone,
+          address: `${booking.doorstepAddress?.street || ''} ${booking.doorstepAddress?.city || 'Mangaluru'}, Karnataka`,
+        },
+        items: items || [],
+        labourCharges,
+        sparePartCharges,
+        additionalCharges,
+        discount,
+        taxRate,
+        taxAmount,
+        totalAmount,
+        amountPaid: paidNum,
+        balanceDue,
+        paymentStatus: resolvedStatus,
+        paymentMethod,
+        paymentReference,
+        paidAt: paidNum > 0 ? new Date() : null,
+        terms: terms || undefined,
+        createdBy: req.user._id,
+      });
+    }
+
+    if (paidNum > 0) {
+      await Payment.create({
+        invoice: invoice._id,
+        customer: booking.customer._id,
+        amount: paidNum,
+        method: paymentMethod,
+        status: PAYMENT_STATUS.PAID,
+        transactionId: paymentReference || `COUNTER-${Date.now()}`,
+        recordedBy: req.user._id,
+      });
+    }
 
     sendInvoiceEmail(invoice, booking.customer).catch(() => {});
 
-    return successResponse(res, 'Invoice generated successfully', { invoice }, 201);
+    return successResponse(res, 'Invoice processed successfully', { invoice }, 201);
   } catch (error) {
     next(error);
   }
