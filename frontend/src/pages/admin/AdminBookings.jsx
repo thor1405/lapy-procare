@@ -52,6 +52,11 @@ export const AdminBookings = () => {
   const [activeInvoice, setActiveInvoice] = useState(null);
   const [prepareBillModalOpen, setPrepareBillModalOpen] = useState(false);
 
+  // Delete Ticket State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [bookingToDelete, setBookingToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [selectedBooking, setSelectedBooking] = useState(null);
 
   // Modal form states
@@ -254,6 +259,23 @@ export const AdminBookings = () => {
     }
   };
 
+  const handleDeleteBooking = async () => {
+    if (!bookingToDelete) return;
+    setIsDeleting(true);
+
+    try {
+      await api.delete(`/admin/bookings/${bookingToDelete.ticketId}`);
+      toast.success(`Ticket ${bookingToDelete.ticketId} deleted successfully`);
+      setDeleteModalOpen(false);
+      setBookingToDelete(null);
+      fetchBookings();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete booking');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -409,6 +431,17 @@ export const AdminBookings = () => {
                         <MessageSquare className="w-3 h-3" />
                         <span>Note</span>
                       </button>
+                      <button
+                        onClick={() => {
+                          setBookingToDelete(b);
+                          setDeleteModalOpen(true);
+                        }}
+                        className="px-2 py-1 rounded-lg bg-rose-50 text-rose-600 font-semibold border border-rose-200 text-xs flex items-center gap-1 hover:bg-rose-100"
+                        title="Delete Ticket"
+                      >
+                        <Trash2 className="w-3 h-3 text-rose-500" />
+                        <span>Delete</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -520,6 +553,18 @@ export const AdminBookings = () => {
                             className="p-1.5 text-teal-600 hover:bg-teal-50"
                           >
                             <MessageSquare className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setBookingToDelete(b);
+                              setDeleteModalOpen(true);
+                            }}
+                            title="Delete Ticket"
+                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
                       </td>
@@ -866,6 +911,86 @@ export const AdminBookings = () => {
           booking={selectedBooking}
         />
       )}
+
+      {/* 6. Delete Ticket Confirmation Modal */}
+      <Modal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          if (!isDeleting) {
+            setDeleteModalOpen(false);
+            setBookingToDelete(null);
+          }
+        }}
+        title="Delete Repair Ticket"
+        maxWidth="max-w-md"
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800">
+            <Trash2 className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+            <div className="text-xs space-y-1">
+              <p className="font-bold text-sm text-rose-900">Are you sure you want to delete this ticket?</p>
+              <p>
+                Ticket <span className="font-mono font-bold text-rose-950 bg-rose-100 px-1 py-0.5 rounded">{bookingToDelete?.ticketId}</span> will be permanently deleted along with all its status history and any linked bills or payments.
+              </p>
+              <p className="text-rose-600 font-semibold pt-0.5">⚠️ This action is permanent and cannot be undone.</p>
+            </div>
+          </div>
+
+          {bookingToDelete && (
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Customer:</span>
+                <span className="font-semibold text-slate-800">{bookingToDelete.customer?.name || 'Walk-in'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Phone:</span>
+                <span className="font-mono text-slate-800">{bookingToDelete.customer?.phone || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Device:</span>
+                <span className="font-semibold text-slate-800">
+                  {bookingToDelete.device?.brand} {bookingToDelete.device?.model}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Status:</span>
+                <span className="font-semibold text-slate-800">{bookingToDelete.status}</span>
+              </div>
+              {bookingToDelete.invoice && (
+                <div className="flex justify-between items-center text-indigo-700 font-semibold pt-1.5 border-t border-slate-200">
+                  <span>Linked Bill Amount:</span>
+                  <span className="font-mono font-bold">₹{bookingToDelete.invoice.totalAmount?.toLocaleString('en-IN')}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200">
+            <Button
+              variant="ghost"
+              size="sm"
+              type="button"
+              disabled={isDeleting}
+              onClick={() => {
+                setDeleteModalOpen(false);
+                setBookingToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              type="button"
+              isLoading={isDeleting}
+              onClick={handleDeleteBooking}
+              icon={Trash2}
+            >
+              Delete Ticket
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

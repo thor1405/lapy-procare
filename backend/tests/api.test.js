@@ -242,5 +242,20 @@ describe('Authentication & RBAC Security Tests', () => {
     expect(invoiceRes.body.data.invoice.billingDetails.email).toBe('');
     expect(invoiceRes.body.data.invoice.billingDetails.phone).toBe('9876500000');
     expect(invoiceRes.body.data.invoice.paymentStatus).toBe('Paid');
+
+    // 3. Admin can delete the booking and its associated invoice
+    const deleteRes = await request(app)
+      .delete(`/api/v1/admin/bookings/${ticketId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(deleteRes.status).toBe(200);
+    expect(deleteRes.body.success).toBe(true);
+
+    // 4. Verify it no longer exists
+    const checkRes = await request(app)
+      .get(`/api/v1/admin/bookings?search=${ticketId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(checkRes.body.data.bookings.find((b) => b.ticketId === ticketId)).toBeUndefined();
   });
 });

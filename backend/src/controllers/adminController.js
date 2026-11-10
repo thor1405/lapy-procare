@@ -318,6 +318,65 @@ export const addBookingNote = async (req, res, next) => {
   }
 };
 
+export const deleteBooking = async (req, res, next) => {
+  try {
+    const { ticketId } = req.params;
+    if (!ticketId) {
+      return errorResponse(res, 'Ticket ID is required', 400);
+    }
+
+    const cleanTicketId = ticketId.trim().toUpperCase();
+    const booking = await RepairBooking.findOne({ ticketId: cleanTicketId });
+    if (!booking) {
+      return errorResponse(res, 'Booking ticket not found', 404);
+    }
+
+    // 1. Delete associated Invoices & Payments
+    const invoices = await Invoice.find({
+      $or: [{ booking: booking._id }, { ticketId: cleanTicketId }],
+    });
+    const invoiceIds = invoices.map((inv) => inv._id);
+    if (invoiceIds.length > 0) {
+      await Payment.deleteMany({ invoice: { $in: invoiceIds } });
+      await Invoice.deleteMany({ _id: { $in: invoiceIds } });
+    }
+
+    // 2. Delete associated Quotations
+    await Quotation.deleteMany({
+      $or: [{ booking: booking._id }, { ticketId: cleanTicketId }],
+    });
+
+    // 3. Delete RepairStatusHistory
+    await RepairStatusHistory.deleteMany({
+      $or: [{ booking: booking._id }, { ticketId: cleanTicketId }],
+    });
+
+    // 4. Detach from any inventory movements
+    await InventoryMovement.updateMany({ repairBooking: booking._id }, { $set: { repairBooking: null } });
+
+    // 5. If walkin dummy customer has no other bookings, clean up
+    if (booking.customer) {
+      const otherBookings = await RepairBooking.countDocuments({
+        customer: booking.customer,
+        _id: { $ne: booking._id },
+      });
+      if (otherBookings === 0) {
+        const customerUser = await User.findById(booking.customer);
+        if (customerUser && customerUser.email && customerUser.email.endsWith('@lapyprocare.local')) {
+          await customerUser.deleteOne();
+        }
+      }
+    }
+
+    // 6. Delete the booking itself
+    await booking.deleteOne();
+
+    return successResponse(res, `Booking ${cleanTicketId} and all associated records deleted successfully`);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ==========================================
 // 2b. CREATE OFFLINE / WALK-IN REPAIR TICKET
 // ==========================================
