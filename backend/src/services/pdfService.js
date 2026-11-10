@@ -152,5 +152,14 @@ export const generateDocumentPDF = (type, data, resStream) => {
     : (data.termsAndConditions || 'Quotation valid for 7 days. Approval is required before repair commencement.');
   doc.text(termsText, 40, y + 12, { width: 515 });
 
+  // Authorized Store Signatory (Right-aligned, no customer signature)
+  y += 45;
+  if (y > 730) {
+    doc.addPage();
+    y = 50;
+  }
+  doc.moveTo(365, y).lineTo(545, y).strokeColor('#94A3B8').stroke();
+  doc.fillColor('#334155').font('Helvetica-Bold').fontSize(9).text('For Lapy Procare Vamanjoor', 365, y + 6, { width: 180, align: 'center' });
+
   doc.end();
 };

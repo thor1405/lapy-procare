@@ -196,7 +196,7 @@ export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
             }
             .signatures {
               display: flex;
-              justify-content: space-between;
+              justify-content: flex-end;
               margin-top: 40px;
               padding-top: 10px;
             }
@@ -464,12 +464,9 @@ export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
             <p>2. Devices not collected within 45 days from collection notice are subject to storage charges.</p>
           </div>
 
-          {/* Signatures */}
-          <div className="flex justify-between items-end pt-8 text-[11px] text-slate-600">
-            <div className="border-t border-slate-400 pt-1 w-36 text-center">
-              Customer Signature
-            </div>
-            <div className="border-t border-slate-400 pt-1 w-44 text-center font-semibold text-slate-800">
+          {/* Authorized Store Signatory */}
+          <div className="flex justify-end items-end pt-8 text-[11px] text-slate-600">
+            <div className="border-t border-slate-400 pt-1 w-48 text-center font-semibold text-slate-800">
               For Lapy Procare Vamanjoor
             </div>
           </div>
