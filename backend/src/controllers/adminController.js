@@ -14,7 +14,7 @@ import { successResponse, errorResponse } from '../utils/apiResponse.js';
 import { generateTicketId, generateQuotationNumber, generateInvoiceNumber } from '../utils/ticketGenerator.js';
 import { emitStatusUpdate } from '../services/socketService.js';
 import { sendStatusUpdateEmail, sendQuotationEmail, sendInvoiceEmail } from '../services/emailService.js';
-import { REPAIR_STATUS, ROLES, PAYMENT_STATUS, QUOTATION_STATUS } from '../config/constants.js';
+import { REPAIR_STATUS, ROLES, PAYMENT_STATUS, PAYMENT_METHOD, QUOTATION_STATUS } from '../config/constants.js';
 
 // ==========================================
 // 1. DASHBOARD ANALYTICS
@@ -450,7 +450,17 @@ export const createOfflineBooking = async (req, res, next) => {
     // 6. Optional: Prepare Bill Now
     let invoice = null;
     if (billing && billing.prepareBillNow) {
-      const items = Array.isArray(billing.items) ? billing.items : [];
+      const rawItems = Array.isArray(billing.items) ? billing.items : [];
+      const cleanItems = rawItems
+        .filter((it) => it && (it.description?.trim() || it.amount > 0 || it.unitPrice > 0))
+        .map((it) => ({
+          description: it.description?.trim() || 'Service Item',
+          itemType: ['Labour', 'Spare Part', 'Service', 'Other'].includes(it.itemType) ? it.itemType : 'Service',
+          quantity: Math.max(1, Number(it.quantity) || 1),
+          unitPrice: Math.max(0, Number(it.unitPrice !== undefined ? it.unitPrice : it.amount) || 0),
+          amount: Math.max(0, Number(it.amount !== undefined ? it.amount : it.unitPrice) || 0),
+        }));
+
       const labourCharges = Number(billing.labourCharges || 0);
       const sparePartCharges = Number(billing.sparePartCharges || 0);
       const additionalCharges = Number(billing.additionalCharges || 0);
@@ -470,6 +480,9 @@ export const createOfflineBooking = async (req, res, next) => {
         paymentStatus = PAYMENT_STATUS.PARTIALLY_PAID;
       }
 
+      const validMethods = Object.values(PAYMENT_METHOD);
+      const resolvedMethod = validMethods.includes(billing.paymentMethod) ? billing.paymentMethod : PAYMENT_METHOD.CASH;
+
       const invoiceNumber = await generateInvoiceNumber();
       invoice = await Invoice.create({
         invoiceNumber,
@@ -482,7 +495,7 @@ export const createOfflineBooking = async (req, res, next) => {
           phone: customerUser.phone,
           address: customer.address?.street?.trim() || '',
         },
-        items,
+        items: cleanItems,
         labourCharges,
         sparePartCharges,
         additionalCharges,
@@ -493,7 +506,7 @@ export const createOfflineBooking = async (req, res, next) => {
         amountPaid,
         balanceDue,
         paymentStatus,
-        paymentMethod: billing.paymentMethod || 'Cash',
+        paymentMethod: resolvedMethod,
         paymentReference: billing.paymentReference || '',
         paidAt: amountPaid > 0 ? new Date() : null,
         terms: billing.terms || 'Thank you for choosing Lapy Procare. All hardware repairs carry a 30-day service warranty.',
@@ -505,7 +518,7 @@ export const createOfflineBooking = async (req, res, next) => {
           invoice: invoice._id,
           customer: customerUser._id,
           amount: amountPaid,
-          method: billing.paymentMethod || 'Cash',
+          method: resolvedMethod,
           status: PAYMENT_STATUS.PAID,
           transactionId: billing.paymentReference || `COUNTER-${Date.now()}`,
           recordedBy: req.user._id,
@@ -648,6 +661,10 @@ export const createInvoice = async (req, res, next) => {
       paymentReference = '',
     } = req.body;
 
+    if (!ticketId || typeof ticketId !== 'string') {
+      return errorResponse(res, 'Ticket ID is required', 400);
+    }
+
     const booking = await RepairBooking.findOne({ ticketId: ticketId.trim().toUpperCase() })
       .populate('customer');
 
@@ -655,12 +672,31 @@ export const createInvoice = async (req, res, next) => {
       return errorResponse(res, 'Repair booking not found', 404);
     }
 
-    const subtotal = Number(labourCharges) + Number(sparePartCharges) + Number(additionalCharges) - Number(discount);
-    const taxAmount = Math.round((subtotal * Number(taxRate)) / 100);
+    const cleanItems = Array.isArray(items)
+      ? items
+          .filter((it) => it && (it.description?.trim() || it.amount > 0 || it.unitPrice > 0))
+          .map((it) => ({
+            description: it.description?.trim() || 'Service Item',
+            itemType: ['Labour', 'Spare Part', 'Service', 'Other'].includes(it.itemType) ? it.itemType : 'Service',
+            quantity: Math.max(1, Number(it.quantity) || 1),
+            unitPrice: Math.max(0, Number(it.unitPrice !== undefined ? it.unitPrice : it.amount) || 0),
+            amount: Math.max(0, Number(it.amount !== undefined ? it.amount : it.unitPrice) || 0),
+          }))
+      : [];
+
+    const safeLabour = Math.max(0, Number(labourCharges) || 0);
+    const safeSpare = Math.max(0, Number(sparePartCharges) || 0);
+    const safeAdditional = Math.max(0, Number(additionalCharges) || 0);
+    const safeDiscount = Math.max(0, Number(discount) || 0);
+    const safeTaxRate = Math.max(0, Number(taxRate !== undefined ? taxRate : 0));
+
+    const subtotal = safeLabour + safeSpare + safeAdditional - safeDiscount;
+    const taxAmount = Math.round((subtotal * safeTaxRate) / 100);
     const totalAmount = Math.max(0, subtotal + taxAmount);
 
     const paidNum = Math.min(totalAmount, Math.max(0, Number(amountPaid) || 0));
     const balanceDue = Math.max(0, totalAmount - paidNum);
+
     let resolvedStatus = paymentStatus;
     if (paidNum >= totalAmount && totalAmount > 0) {
       resolvedStatus = PAYMENT_STATUS.PAID;
@@ -668,20 +704,23 @@ export const createInvoice = async (req, res, next) => {
       resolvedStatus = PAYMENT_STATUS.PARTIALLY_PAID;
     }
 
+    const validMethods = Object.values(PAYMENT_METHOD);
+    const resolvedMethod = validMethods.includes(paymentMethod) ? paymentMethod : PAYMENT_METHOD.CASH;
+
     let invoice = await Invoice.findOne({ ticketId: booking.ticketId });
     if (invoice) {
-      invoice.items = items || [];
-      invoice.labourCharges = labourCharges;
-      invoice.sparePartCharges = sparePartCharges;
-      invoice.additionalCharges = additionalCharges;
-      invoice.discount = discount;
-      invoice.taxRate = taxRate;
+      invoice.items = cleanItems;
+      invoice.labourCharges = safeLabour;
+      invoice.sparePartCharges = safeSpare;
+      invoice.additionalCharges = safeAdditional;
+      invoice.discount = safeDiscount;
+      invoice.taxRate = safeTaxRate;
       invoice.taxAmount = taxAmount;
       invoice.totalAmount = totalAmount;
       invoice.amountPaid = paidNum;
       invoice.balanceDue = balanceDue;
       invoice.paymentStatus = resolvedStatus;
-      invoice.paymentMethod = paymentMethod;
+      invoice.paymentMethod = resolvedMethod;
       invoice.paymentReference = paymentReference;
       if (paidNum > 0) invoice.paidAt = new Date();
       if (terms) invoice.terms = terms;
@@ -695,23 +734,23 @@ export const createInvoice = async (req, res, next) => {
         quotation: quotationId || null,
         customer: booking.customer._id,
         billingDetails: {
-          name: booking.customer.name,
-          email: booking.customer.email && !booking.customer.email.includes('@lapyprocare.local') ? booking.customer.email : '',
-          phone: booking.customer.phone,
+          name: booking.customer?.name || 'Walk-in Customer',
+          email: booking.customer?.email && !booking.customer.email.includes('@lapyprocare.local') ? booking.customer.email : '',
+          phone: booking.customer?.phone || '',
           address: (booking.doorstepAddress?.street && !booking.doorstepAddress?.street.toLowerCase().includes('walk-in') && !booking.doorstepAddress?.street.toLowerCase().includes('in-store')) ? `${booking.doorstepAddress.street}` : '',
         },
-        items: items || [],
-        labourCharges,
-        sparePartCharges,
-        additionalCharges,
-        discount,
-        taxRate,
+        items: cleanItems,
+        labourCharges: safeLabour,
+        sparePartCharges: safeSpare,
+        additionalCharges: safeAdditional,
+        discount: safeDiscount,
+        taxRate: safeTaxRate,
         taxAmount,
         totalAmount,
         amountPaid: paidNum,
         balanceDue,
         paymentStatus: resolvedStatus,
-        paymentMethod,
+        paymentMethod: resolvedMethod,
         paymentReference,
         paidAt: paidNum > 0 ? new Date() : null,
         terms: terms || undefined,
@@ -724,7 +763,7 @@ export const createInvoice = async (req, res, next) => {
         invoice: invoice._id,
         customer: booking.customer._id,
         amount: paidNum,
-        method: paymentMethod,
+        method: resolvedMethod,
         status: PAYMENT_STATUS.PAID,
         transactionId: paymentReference || `COUNTER-${Date.now()}`,
         recordedBy: req.user._id,

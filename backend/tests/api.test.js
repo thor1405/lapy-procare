@@ -188,4 +188,59 @@ describe('Authentication & RBAC Security Tests', () => {
     expect(walkinBooking.invoice).toBeDefined();
     expect(walkinBooking.invoice.totalAmount).toBe(4000);
   });
+
+  it('Admin can generate an invoice via POST /api/v1/admin/invoices for a booking without email or address', async () => {
+    // 1. Create a walkin booking without billing
+    const offlineRes = await request(app)
+      .post('/api/v1/admin/bookings/offline')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        customer: {
+          name: 'Walkin Customer No Email',
+          phone: '9876500000',
+        },
+        device: {
+          deviceType: 'Laptop',
+          brand: 'Lenovo',
+          model: 'ThinkPad T480',
+        },
+        problem: {
+          category: 'Keyboard Issue',
+          description: 'Keys not responding',
+        },
+        billing: {
+          prepareBillNow: false,
+        },
+      });
+
+    expect(offlineRes.status).toBe(201);
+    const ticketId = offlineRes.body.data.booking.ticketId;
+
+    // 2. Generate invoice via POST /api/v1/admin/invoices
+    const invoiceRes = await request(app)
+      .post('/api/v1/admin/invoices')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        ticketId,
+        labourCharges: 500,
+        sparePartCharges: 1500,
+        discount: 0,
+        taxRate: 18,
+        items: [
+          { description: 'Keyboard Replacement', itemType: 'Spare Part', quantity: 1, unitPrice: 1500, amount: 1500 },
+          { description: 'Installation Service', itemType: 'Labour', quantity: 1, unitPrice: 500, amount: 500 },
+        ],
+        amountPaid: 2360,
+        paymentMethod: 'UPI',
+      });
+
+    expect(invoiceRes.status).toBe(201);
+    expect(invoiceRes.body.success).toBe(true);
+    expect(invoiceRes.body.data.invoice).toBeDefined();
+    expect(invoiceRes.body.data.invoice.totalAmount).toBe(2360);
+    expect(invoiceRes.body.data.invoice.billingDetails.name).toBe('Walkin Customer No Email');
+    expect(invoiceRes.body.data.invoice.billingDetails.email).toBe('');
+    expect(invoiceRes.body.data.invoice.billingDetails.phone).toBe('9876500000');
+    expect(invoiceRes.body.data.invoice.paymentStatus).toBe('Paid');
+  });
 });

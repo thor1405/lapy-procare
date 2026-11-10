@@ -45,9 +45,9 @@ const invoiceSchema = new mongoose.Schema(
     },
     billingDetails: {
       name: { type: String, required: true },
-      email: { type: String, required: true },
+      email: { type: String, default: '' },
       phone: { type: String, required: true },
-      address: { type: String, default: 'Mangaluru, Karnataka' },
+      address: { type: String, default: '' },
     },
     items: [invoiceItemSchema],
     labourCharges: { type: Number, default: 0, min: 0 },
