@@ -61,13 +61,14 @@ export const AdminNewTicket = () => {
   // Success / Bill Modal State
   const [createdResult, setCreatedResult] = useState(null);
   const [isBillModalOpen, setIsBillModalOpen] = useState(false);
+  const [showOptionalContact, setShowOptionalContact] = useState(false);
 
   // Form State
   const [customer, setCustomer] = useState({
     name: '',
     phone: '',
     email: '',
-    address: { street: '', city: 'Mangaluru', postalCode: '575028' },
+    address: { street: '', city: '', postalCode: '' },
   });
 
   const [device, setDevice] = useState({
@@ -289,7 +290,7 @@ export const AdminNewTicket = () => {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
                 Customer Full Name *
@@ -323,44 +324,58 @@ export const AdminNewTicket = () => {
                 />
               </div>
             </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Email Address <span className="text-slate-400 font-normal">(Optional)</span>
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="email"
-                  value={customer.email}
-                  onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
-                  placeholder="customer@gmail.com"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-2 md:col-span-3">
-              <label className="block font-semibold text-slate-700 mb-1">
-                Address / Locality <span className="text-slate-400 font-normal">(Optional)</span>
-              </label>
-              <div className="relative">
-                <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={customer.address.street}
-                  onChange={(e) =>
-                    setCustomer({
-                      ...customer,
-                      address: { ...customer.address, street: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Near St. Joseph College, Vamanjoor, Mangaluru"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-            </div>
           </div>
+
+          {showOptionalContact ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-3 border-t border-slate-100">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Email Address <span className="text-slate-400 font-normal">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    value={customer.email}
+                    onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
+                    placeholder="customer@gmail.com"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Address / Locality <span className="text-slate-400 font-normal">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={customer.address.street}
+                    onChange={(e) =>
+                      setCustomer({
+                        ...customer,
+                        address: { ...customer.address, street: e.target.value },
+                      })
+                    }
+                    placeholder="e.g. Vamanjoor, Mangaluru"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setShowOptionalContact(true)}
+                className="text-xs text-[#4F46E5] font-semibold hover:underline inline-flex items-center gap-1"
+              >
+                + Add Email or Address (Optional)
+              </button>
+            </div>
+          )}
         </Card>
 
         {/* Section 2: Device Specs & Accessories */}

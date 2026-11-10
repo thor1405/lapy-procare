@@ -38,14 +38,25 @@ export const generateDocumentPDF = (type, data, resStream) => {
   doc.fontSize(10).font('Helvetica-Bold').fillColor('#0F172A').text('CUSTOMER DETAILS:', 40, 115);
   doc.font('Helvetica').fillColor('#334155');
   const customerName = data.customer?.name || data.billingDetails?.name || 'Customer';
-  const customerEmail = data.customer?.email || data.billingDetails?.email || '';
+  const rawEmail = data.billingDetails?.email || data.customer?.email || '';
+  const customerEmail = !rawEmail || rawEmail.includes('@lapyprocare.local') || rawEmail.includes('walkin.') ? '' : rawEmail;
   const customerPhone = data.customer?.phone || data.billingDetails?.phone || '';
-  const customerAddr = data.billingDetails?.address || 'Mangaluru, Karnataka';
+  const rawAddr = data.billingDetails?.address || '';
+  const isWalkinAddr = !rawAddr || rawAddr.toLowerCase().includes('walk-in') || rawAddr.toLowerCase().includes('in-store') || rawAddr.toLowerCase().includes('drop off');
+  const customerAddr = isWalkinAddr ? '' : rawAddr;
 
-  doc.text(`Name: ${customerName}`, 40, 130);
-  doc.text(`Phone: ${customerPhone}`, 40, 144);
-  doc.text(`Email: ${customerEmail}`, 40, 158);
-  doc.text(`Address: ${customerAddr}`, 40, 172);
+  let curY = 130;
+  doc.text(`Name: ${customerName}`, 40, curY);
+  curY += 14;
+  doc.text(`Phone: ${customerPhone}`, 40, curY);
+  if (customerEmail) {
+    curY += 14;
+    doc.text(`Email: ${customerEmail}`, 40, curY);
+  }
+  if (customerAddr) {
+    curY += 14;
+    doc.text(`Address: ${customerAddr}`, 40, curY);
+  }
 
   // Status Box
   doc.rect(380, 115, 175, 60).fillAndStroke('#F8FAFC', '#E2E8F0');

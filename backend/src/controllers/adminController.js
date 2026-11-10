@@ -478,9 +478,9 @@ export const createOfflineBooking = async (req, res, next) => {
         customer: customerUser._id,
         billingDetails: {
           name: customerUser.name,
-          email: customerUser.email,
+          email: cleanEmail || '',
           phone: customerUser.phone,
-          address: `${customerUser.address?.street || 'Walk-in'}, Mangaluru, Karnataka`,
+          address: customer.address?.street?.trim() || '',
         },
         items,
         labourCharges,
@@ -696,9 +696,9 @@ export const createInvoice = async (req, res, next) => {
         customer: booking.customer._id,
         billingDetails: {
           name: booking.customer.name,
-          email: booking.customer.email,
+          email: booking.customer.email && !booking.customer.email.includes('@lapyprocare.local') ? booking.customer.email : '',
           phone: booking.customer.phone,
-          address: `${booking.doorstepAddress?.street || ''} ${booking.doorstepAddress?.city || 'Mangaluru'}, Karnataka`,
+          address: (booking.doorstepAddress?.street && !booking.doorstepAddress?.street.toLowerCase().includes('walk-in') && !booking.doorstepAddress?.street.toLowerCase().includes('in-store')) ? `${booking.doorstepAddress.street}` : '',
         },
         items: items || [],
         labourCharges,

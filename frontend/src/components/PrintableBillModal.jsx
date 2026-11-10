@@ -12,9 +12,11 @@ export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
   const b = booking || inv?.booking;
 
   const customerName = inv?.billingDetails?.name || b?.customer?.name || 'Walk-in Customer';
-  const customerPhone = inv?.billingDetails?.phone || b?.customer?.phone || 'N/A';
-  const customerEmail = inv?.billingDetails?.email || b?.customer?.email || '';
-  const customerAddress = inv?.billingDetails?.address || b?.doorstepAddress?.street || 'Mangaluru, Karnataka';
+  const rawEmail = inv?.billingDetails?.email || b?.customer?.email || '';
+  const customerEmail = !rawEmail || rawEmail.includes('@lapyprocare.local') || rawEmail.includes('walkin.') ? '' : rawEmail;
+  const rawAddress = inv?.billingDetails?.address || b?.doorstepAddress?.street || '';
+  const isWalkinAddr = !rawAddress || rawAddress.toLowerCase().includes('walk-in') || rawAddress.toLowerCase().includes('in-store') || rawAddress.toLowerCase().includes('drop off');
+  const customerAddress = isWalkinAddr ? '' : rawAddress;
 
   const deviceBrand = b?.device?.brand || '';
   const deviceModel = b?.device?.model || '';
@@ -308,8 +310,8 @@ export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
               </h3>
               <p className="font-semibold text-slate-900 text-sm">{customerName}</p>
               <p className="text-slate-700 font-mono">Phone: {customerPhone}</p>
-              {customerEmail && <p className="text-slate-600 truncate">Email: {customerEmail}</p>}
-              <p className="text-slate-600">Address: {customerAddress}</p>
+              {customerEmail ? <p className="text-slate-600 truncate">Email: {customerEmail}</p> : null}
+              {customerAddress ? <p className="text-slate-600">Address: {customerAddress}</p> : null}
             </div>
 
             <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
