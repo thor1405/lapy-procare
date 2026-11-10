@@ -12,6 +12,7 @@ export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
   const b = booking || inv?.booking;
 
   const customerName = inv?.billingDetails?.name || b?.customer?.name || 'Walk-in Customer';
+  const customerPhone = inv?.billingDetails?.phone || b?.customer?.phone || '';
   const rawEmail = inv?.billingDetails?.email || b?.customer?.email || '';
   const customerEmail = !rawEmail || rawEmail.includes('@lapyprocare.local') || rawEmail.includes('walkin.') ? '' : rawEmail;
   const rawAddress = inv?.billingDetails?.address || b?.doorstepAddress?.street || '';
@@ -309,7 +310,7 @@ export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
                 Customer Details
               </h3>
               <p className="font-semibold text-slate-900 text-sm">{customerName}</p>
-              <p className="text-slate-700 font-mono">Phone: {customerPhone}</p>
+              {customerPhone ? <p className="text-slate-700 font-mono">Phone: {customerPhone}</p> : null}
               {customerEmail ? <p className="text-slate-600 truncate">Email: {customerEmail}</p> : null}
               {customerAddress ? <p className="text-slate-600">Address: {customerAddress}</p> : null}
             </div>
