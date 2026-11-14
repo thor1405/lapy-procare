@@ -689,7 +689,7 @@ export const Home = () => {
                 </div>
                 <div className="flex items-start gap-2.5 text-xs text-[#334155]">
                   <CheckCheck className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
-                  <span><strong>Doorstep Return:</strong> Clean handover, thorough quality testing, and digital GST invoice.</span>
+                  <span><strong>Doorstep Return:</strong> Clean handover, thorough quality testing, and digital invoice.</span>
                 </div>
               </div>
 
@@ -844,7 +844,7 @@ export const Home = () => {
             {
               step: '04',
               title: 'Handover & Warranty',
-              desc: 'Pickup at Vamanjoor or enjoy doorstep return with full GST invoice and 30-day service warranty.',
+              desc: 'Pickup at Vamanjoor or enjoy doorstep return with full itemized bill and 30-day service warranty.',
               color: 'text-indigo-600 bg-indigo-50',
             },
           ].map((item, idx) => (

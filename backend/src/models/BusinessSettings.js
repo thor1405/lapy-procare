@@ -22,7 +22,7 @@ const businessSettingsSchema = new mongoose.Schema(
     isDoorstepServiceEnabled: { type: Boolean, default: true },
     isAIAssistantEnabled: { type: Boolean, default: true },
     isOnlinePaymentsEnabled: { type: Boolean, default: false },
-    standardGSTPercentage: { type: Number, default: 18 },
+    standardGSTPercentage: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

@@ -746,49 +746,32 @@ export const AdminNewTicket = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      Discount (₹)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={discount}
-                      onChange={(e) => setDiscount(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-emerald-700 focus:bg-white focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">
+                        Additional Fees (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={additionalCharges}
+                        onChange={(e) => setAdditionalCharges(e.target.value)}
+                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      GST Tax
-                    </label>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setTaxRate(0)}
-                        className={`flex-1 py-1.5 rounded-xl border text-xs font-semibold ${
-                          taxRate === 0
-                            ? 'bg-indigo-600 text-white border-indigo-600'
-                            : 'bg-slate-50 border-slate-200 text-slate-700'
-                        }`}
-                      >
-                        0% (No GST)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setTaxRate(18)}
-                        className={`flex-1 py-1.5 rounded-xl border text-xs font-semibold ${
-                          taxRate === 18
-                            ? 'bg-indigo-600 text-white border-indigo-600'
-                            : 'bg-slate-50 border-slate-200 text-slate-700'
-                        }`}
-                      >
-                        18% GST
-                      </button>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">
+                        Discount (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={discount}
+                        onChange={(e) => setDiscount(e.target.value)}
+                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-emerald-700 focus:bg-white focus:outline-none focus:border-indigo-500"
+                      />
                     </div>
                   </div>
-                </div>
 
                 {/* Right: Payment collection & Totals */}
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 text-xs">
@@ -797,12 +780,6 @@ export const AdminNewTicket = () => {
                       <span>Subtotal:</span>
                       <span className="font-mono text-slate-900">₹{subtotal.toLocaleString('en-IN')}</span>
                     </div>
-                    {taxAmount > 0 && (
-                      <div className="flex justify-between">
-                        <span>GST ({taxRate}%):</span>
-                        <span className="font-mono text-slate-900">₹{taxAmount.toLocaleString('en-IN')}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between items-center text-sm font-bold text-slate-900 pt-1 border-t border-slate-200">
                       <span>Grand Total:</span>
                       <span className="font-mono text-indigo-700 text-base">

@@ -54,7 +54,7 @@ const invoiceSchema = new mongoose.Schema(
     sparePartCharges: { type: Number, default: 0, min: 0 },
     additionalCharges: { type: Number, default: 0, min: 0 },
     discount: { type: Number, default: 0, min: 0 },
-    taxRate: { type: Number, default: 18 },
+    taxRate: { type: Number, default: 0 },
     taxAmount: { type: Number, default: 0, min: 0 },
     totalAmount: { type: Number, required: true, min: 0 },
     amountPaid: { type: Number, default: 0, min: 0 },

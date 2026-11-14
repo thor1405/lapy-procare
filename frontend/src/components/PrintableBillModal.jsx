@@ -291,7 +291,7 @@ export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
 
             <div className="text-left sm:text-right space-y-0.5">
               <h2 className="text-base sm:text-lg font-bold text-indigo-600 font-mono">
-                {inv ? 'TAX INVOICE / BILL' : 'REPAIR JOB CARD'}
+                {inv ? 'INVOICE / BILL' : 'REPAIR JOB CARD'}
               </h2>
               <p className="font-mono text-slate-800 font-bold text-sm">
                 Bill #: <span className="text-indigo-600">{invoiceNumber}</span>
@@ -436,12 +436,6 @@ export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
                 <div className="flex justify-between text-emerald-700 font-medium">
                   <span>Special Discount:</span>
                   <span className="font-mono">- ₹{discount.toLocaleString('en-IN')}</span>
-                </div>
-              )}
-              {taxAmount > 0 && (
-                <div className="flex justify-between">
-                  <span>GST ({taxRate}%):</span>
-                  <span className="font-mono text-slate-900">₹{taxAmount.toLocaleString('en-IN')}</span>
                 </div>
               )}
 

@@ -51,7 +51,7 @@ export const Login = () => {
           </Link>
           <h2 className="text-2xl font-bold text-[#111827] pt-2">Sign In to Your Account</h2>
           <p className="text-xs text-[#64748B]">
-            Access repair tracking, quotations, GST invoices, and service history.
+            Access repair tracking, quotations, invoices, and service history.
           </p>
         </div>
 

@@ -617,7 +617,7 @@ export const createQuotation = async (req, res, next) => {
       sparePartCharges = 0,
       additionalCharges = 0,
       discount = 0,
-      taxRate = 18,
+      taxRate = 0,
       validityDays = 7,
       termsAndConditions,
     } = req.body;
@@ -712,7 +712,7 @@ export const createInvoice = async (req, res, next) => {
       sparePartCharges = 0,
       additionalCharges = 0,
       discount = 0,
-      taxRate = 18,
+      taxRate = 0,
       terms,
       paymentStatus = PAYMENT_STATUS.UNPAID,
       paymentMethod = 'Cash',

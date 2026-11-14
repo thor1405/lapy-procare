@@ -815,6 +815,16 @@ export const AdminBookings = () => {
                 />
               </div>
               <div>
+                <label className="block font-semibold text-slate-700 mb-0.5">Additional Fees (₹)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={billAdditional}
+                  onChange={(e) => setBillAdditional(e.target.value)}
+                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg font-mono text-slate-900"
+                />
+              </div>
+              <div>
                 <label className="block font-semibold text-slate-700 mb-0.5">Discount (₹)</label>
                 <input
                   type="number"
@@ -824,17 +834,6 @@ export const AdminBookings = () => {
                   className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg font-mono text-emerald-700"
                 />
               </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-0.5">GST Rate</label>
-                <select
-                  value={billTaxRate}
-                  onChange={(e) => setBillTaxRate(Number(e.target.value))}
-                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg font-semibold"
-                >
-                  <option value={0}>0% (No GST)</option>
-                  <option value={18}>18% GST</option>
-                </select>
-              </div>
             </div>
 
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
@@ -843,12 +842,6 @@ export const AdminBookings = () => {
                   <span>Subtotal:</span>
                   <span className="font-mono text-slate-900">₹{billSubtotal.toLocaleString('en-IN')}</span>
                 </div>
-                {billTaxAmount > 0 && (
-                  <div className="flex justify-between">
-                    <span>GST ({billTaxRate}%):</span>
-                    <span className="font-mono text-slate-900">₹{billTaxAmount.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
                 <div className="flex justify-between items-center text-sm font-bold text-slate-900 pt-1 border-t border-slate-200">
                   <span>Grand Total:</span>
                   <span className="font-mono text-indigo-700">₹{billGrandTotal.toLocaleString('en-IN')}</span>

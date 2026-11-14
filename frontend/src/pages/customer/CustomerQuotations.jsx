@@ -197,7 +197,7 @@ export const CustomerQuotations = () => {
                   <div className="text-[11px] text-[#64748B] space-y-0.5">
                     <p>Labour: ₹{quote.labourCharges.toLocaleString('en-IN')}</p>
                     <p>Spare Parts: ₹{quote.sparePartCharges.toLocaleString('en-IN')}</p>
-                    <p>GST ({quote.taxRate}%): ₹{quote.taxAmount.toLocaleString('en-IN')}</p>
+                    {quote.discount > 0 && <p className="text-emerald-700">Discount: -₹{quote.discount.toLocaleString('en-IN')}</p>}
                   </div>
 
                   <div className="text-right">

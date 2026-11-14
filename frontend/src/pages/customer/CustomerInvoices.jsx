@@ -36,7 +36,7 @@ export const CustomerInvoices = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      toast.success('Tax invoice PDF downloaded');
+      toast.success('Invoice PDF downloaded');
     } catch (err) {
       toast.error('Unable to download PDF invoice');
     }
@@ -46,10 +46,10 @@ export const CustomerInvoices = () => {
     <div className="space-y-6">
       <div className="pb-6 border-b border-[#E2E8F0]">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#111827] font-['Sora'] tracking-tight">
-          Tax Invoices & Billing
+          Invoices & Billing
         </h1>
         <p className="text-xs sm:text-sm text-[#64748B] mt-1">
-          Official GST invoices, payment receipts, and 30-day warranty records.
+          Official repair invoices, payment receipts, and 30-day warranty records.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export const CustomerInvoices = () => {
           <Receipt className="w-12 h-12 mx-auto text-slate-300 mb-3" />
           <h3 className="text-base font-bold text-[#111827] mb-1">No billing records yet</h3>
           <p className="text-xs max-w-sm mx-auto">
-            Official GST tax invoices will be generated and available for PDF download once your repairs conclude.
+            Official repair invoices will be generated and available for PDF download once your repairs conclude.
           </p>
         </Card>
       ) : (
@@ -92,7 +92,7 @@ export const CustomerInvoices = () => {
                     onClick={() => handleDownloadPdf(inv._id, inv.invoiceNumber)}
                     icon={Download}
                   >
-                    Download Tax Invoice PDF
+                    Download Invoice PDF
                   </Button>
                 </div>
               </div>
@@ -132,7 +132,7 @@ export const CustomerInvoices = () => {
                 <div className="text-[11px] text-[#64748B] space-y-0.5">
                   <p>Payment Mode: <strong className="text-[#111827] font-medium">{inv.paymentMethod}</strong></p>
                   <p>Labour: ₹{inv.labourCharges.toLocaleString('en-IN')} | Parts: ₹{inv.sparePartCharges.toLocaleString('en-IN')}</p>
-                  <p>GST ({inv.taxRate}%): ₹{inv.taxAmount.toLocaleString('en-IN')}</p>
+                  {inv.discount > 0 && <p className="text-emerald-700 font-medium">Discount: -₹{inv.discount.toLocaleString('en-IN')}</p>}
                 </div>
 
                 <div className="text-right">

@@ -19,7 +19,7 @@ export const AdminSettings = () => {
     },
     isDoorstepServiceEnabled: true,
     isAIAssistantEnabled: true,
-    standardGSTPercentage: 18,
+    standardGSTPercentage: 0,
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -162,23 +162,6 @@ export const AdminSettings = () => {
                   setSettings({ ...settings, isAIAssistantEnabled: e.target.checked })
                 }
                 className="w-5 h-5 rounded border-slate-300 text-[#4F46E5] focus:ring-indigo-500"
-              />
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-              <div>
-                <h4 className="text-xs font-bold text-[#111827]">Standard GST Tax Rate (%)</h4>
-                <p className="text-[11px] text-[#64748B]">Applicable to invoices and quotations (18% standard).</p>
-              </div>
-              <input
-                type="number"
-                min="0"
-                max="28"
-                value={settings.standardGSTPercentage}
-                onChange={(e) =>
-                  setSettings({ ...settings, standardGSTPercentage: Number(e.target.value) })
-                }
-                className="w-20 bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-[#111827] text-right font-mono focus:outline-none focus:border-indigo-500"
               />
             </div>
           </div>

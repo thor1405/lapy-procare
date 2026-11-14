@@ -153,7 +153,7 @@ export const servicesData = [
     fullDescription: 'Skip the traffic and travel. Our verified hardware technician arrives at your home or office equipped with professional diagnostic tools. Minor software, network, and component issues resolved on-site; complex micro-soldering handled via secure lab transit with live GPS tracking.',
     startingPrice: 399,
     estimatedTime: 'Same Day On-Site',
-    features: ['On-site technician visit at your home/office', 'Transparent diagnosis before any work starts', 'Secure transit to Vamanjoor lab if needed', 'Available across Mangaluru, Surathkal & nearby', 'Digital GST invoice & service warranty'],
+    features: ['On-site technician visit at your home/office', 'Transparent diagnosis before any work starts', 'Secure transit to Vamanjoor lab if needed', 'Available across Mangaluru, Surathkal & nearby', 'Digital invoice & service warranty'],
     order: 13,
   },
 ];
@@ -354,7 +354,7 @@ export const autoSeedIfEmpty = async () => {
         },
         isDoorstepServiceEnabled: true,
         isAIAssistantEnabled: true,
-        standardGSTPercentage: 18,
+        standardGSTPercentage: 0,
       });
     }
 
@@ -434,7 +434,7 @@ export const autoSeedIfEmpty = async () => {
           customerName: 'Sneha Mendonca',
           rating: 5,
           service: 'Custom PC Builds',
-          comment: 'Got my 4K video editing workstation assembled here in Mangaluru. Cable management is textbook quality, thermal performance stays under 70°C, and they provided genuine GST invoices for every single part.',
+          comment: 'Got my 4K video editing workstation assembled here in Mangaluru. Cable management is textbook quality, thermal performance stays under 70°C, and they provided genuine invoices and warranty for every single part.',
           isApproved: true,
         },
       ]);
@@ -474,7 +474,7 @@ export const seedDatabase = async () => {
       },
       isDoorstepServiceEnabled: true,
       isAIAssistantEnabled: true,
-      standardGSTPercentage: 18,
+      standardGSTPercentage: 0,
     });
     console.log('✔ Business settings seeded.');
 
@@ -549,7 +549,7 @@ export const seedDatabase = async () => {
         customerName: 'Sneha Mendonca',
         rating: 5,
         service: 'Custom PC Builds',
-        comment: 'Got my 4K video editing workstation assembled here in Mangaluru. Cable management is textbook quality, thermal performance stays under 70°C, and they provided genuine GST invoices for every single part.',
+        comment: 'Got my 4K video editing workstation assembled here in Mangaluru. Cable management is textbook quality, thermal performance stays under 70°C, and they provided genuine invoices and warranty for every single part.',
         isApproved: true,
       },
     ]);

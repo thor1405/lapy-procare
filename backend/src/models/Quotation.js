@@ -66,7 +66,7 @@ const quotationSchema = new mongoose.Schema(
     },
     taxRate: {
       type: Number,
-      default: 18, // 18% GST standard in India for IT services
+      default: 0,
     },
     taxAmount: {
       type: Number,

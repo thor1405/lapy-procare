@@ -11,7 +11,7 @@ export const generateDocumentPDF = (type, data, resStream) => {
   doc.pipe(resStream);
 
   const isInvoice = type === 'INVOICE';
-  const docTitle = isInvoice ? 'TAX INVOICE' : 'ESTIMATE / QUOTATION';
+  const docTitle = isInvoice ? 'INVOICE / BILL' : 'ESTIMATE / QUOTATION';
   const docNumber = isInvoice ? data.invoiceNumber : data.quotationNumber;
 
   // Header Background Accent Bar
@@ -126,9 +126,11 @@ export const generateDocumentPDF = (type, data, resStream) => {
     y += 16;
   }
 
-  doc.text(`GST Tax (${data.taxRate || 18}%):`, totalsLeft, y);
-  doc.text(`Rs. ${Number(data.taxAmount || 0).toLocaleString('en-IN')}`, 470, y);
-  y += 20;
+  if (data.taxAmount > 0) {
+    doc.text(`Tax:`, totalsLeft, y);
+    doc.text(`Rs. ${Number(data.taxAmount || 0).toLocaleString('en-IN')}`, 470, y);
+    y += 16;
+  }
 
   // Grand Total Highlight Bar
   doc.rect(totalsLeft - 10, y, 215, 28).fill('#007BFF');

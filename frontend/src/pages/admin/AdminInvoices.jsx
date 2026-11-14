@@ -66,7 +66,7 @@ export const AdminInvoices = () => {
     setIsSubmitting(true);
     try {
       await api.post('/admin/invoices', formData);
-      toast.success('Tax invoice generated successfully!');
+      toast.success('Invoice generated successfully!');
       setCreateModalOpen(false);
       fetchInvoices();
     } catch (err) {
@@ -105,10 +105,10 @@ export const AdminInvoices = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E2E8F0]">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#111827] font-['Sora'] tracking-tight">
-            Tax Invoices & Payment Ledger
+            Invoices & Payment Ledger
           </h1>
           <p className="text-xs sm:text-sm text-[#64748B] mt-1">
-            Track customer receivables, record cash and UPI transactions, and export GST invoices.
+            Track customer receivables, record cash and UPI transactions, and export invoices.
           </p>
         </div>
         <Button onClick={() => setCreateModalOpen(true)} icon={Plus} size="sm">
@@ -349,7 +349,7 @@ export const AdminInvoices = () => {
       <Modal
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        title="Generate Tax Invoice"
+        title="Generate Invoice"
       >
         <form onSubmit={handleCreateInvoice} className="space-y-4">
           <div>

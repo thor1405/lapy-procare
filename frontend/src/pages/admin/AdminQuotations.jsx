@@ -82,9 +82,7 @@ export const AdminQuotations = () => {
   };
 
   const calculateTotal = () => {
-    const sub = calculateSubtotal();
-    const gst = Math.round((sub * 18) / 100);
-    return sub + gst;
+    return calculateSubtotal();
   };
 
   const handleCreateQuotation = async (e) => {
@@ -127,7 +125,7 @@ export const AdminQuotations = () => {
             Quotation Management
           </h1>
           <p className="text-xs sm:text-sm text-[#64748B] mt-1">
-            Issue diagnostic repair estimates with itemized parts and GST calculation.
+            Issue diagnostic repair estimates with itemized parts and transparent pricing.
           </p>
         </div>
         <Button onClick={() => setCreateModalOpen(true)} icon={Plus} size="sm">
@@ -356,7 +354,7 @@ export const AdminQuotations = () => {
 
           {/* Subtotals */}
           <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs flex justify-between items-center">
-            <span className="text-[#64748B] font-medium">Total with 18% GST:</span>
+            <span className="text-[#64748B] font-medium">Estimated Total:</span>
             <span className="text-base font-bold text-[#4F46E5] font-mono">
               ₹{calculateTotal().toLocaleString('en-IN')}
             </span>

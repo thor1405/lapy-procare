@@ -52,7 +52,7 @@ export const CustomerDashboard = () => {
             Welcome, {user?.name?.split(' ')[0] || 'Customer'}!
           </h1>
           <p className="text-xs sm:text-sm text-[#64748B] mt-1">
-            Manage your computer repair appointments, active tickets, and tax invoices.
+            Manage your computer repair appointments, active tickets, and invoices.
           </p>
         </div>
         <Link to="/customer/book">

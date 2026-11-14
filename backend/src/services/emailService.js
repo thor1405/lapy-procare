@@ -143,13 +143,13 @@ export const sendQuotationEmail = async (quotation, customer, ticketId) => {
 
 export const sendInvoiceEmail = async (invoice, customer) => {
   const html = baseTemplate(
-    'Tax Invoice Generated',
+    'Invoice Generated',
     `
     <p>Dear <strong>${customer.name}</strong>,</p>
     <p>Your repair service has concluded. Please find the details of Invoice <strong>${invoice.invoiceNumber}</strong> below.</p>
     <p><strong>Total Amount:</strong> ₹${invoice.totalAmount.toLocaleString('en-IN')}</p>
     <p><strong>Payment Status:</strong> ${invoice.paymentStatus}</p>
-    <p>You can view and download your full GST tax invoice from your portal.</p>
+    <p>You can view and download your official invoice and payment receipt from your customer portal.</p>
     <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/customer/invoices" class="btn">View & Download Invoice</a>
     `
   );
