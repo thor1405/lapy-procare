@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
-import { Printer, Download } from 'lucide-react';
+import { Printer, Download, Edit3, CheckCircle, AlertCircle } from 'lucide-react';
 
-export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
+export const PrintableBillModal = ({ isOpen, onClose, invoice, booking, onEditBill, onUpdatePaymentStatus }) => {
   const printAreaRef = useRef(null);
 
   if (!invoice && !booking) return null;
@@ -235,7 +235,7 @@ export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
       <div className="space-y-4">
         {/* Actions Bar */}
         <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold text-slate-700">Receipt Status:</span>
             <span
               className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
@@ -246,9 +246,42 @@ export const PrintableBillModal = ({ isOpen, onClose, invoice, booking }) => {
             >
               {paymentStatus.toUpperCase()}
             </span>
+            {onUpdatePaymentStatus && (
+              paymentStatus.toLowerCase() === 'paid' ? (
+                <button
+                  type="button"
+                  onClick={() => onUpdatePaymentStatus(inv?.ticketId || b?.ticketId, 'Unpaid')}
+                  className="px-2 py-0.5 text-[11px] font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors"
+                >
+                  Mark as Unpaid
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onUpdatePaymentStatus(inv?.ticketId || b?.ticketId, 'Paid')}
+                  className="px-2 py-0.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors flex items-center gap-1"
+                >
+                  <CheckCircle className="w-3 h-3" /> Mark as Paid
+                </button>
+              )
+            )}
           </div>
 
           <div className="flex items-center gap-2">
+            {onEditBill && (
+              <Button
+                size="sm"
+                variant="outline"
+                icon={Edit3}
+                onClick={() => {
+                  onClose();
+                  onEditBill(b, inv);
+                }}
+                className="text-xs text-indigo-700 border-indigo-200 bg-white hover:bg-indigo-50"
+              >
+                Edit Bill & Costs
+              </Button>
+            )}
             <Button size="sm" variant="primary" icon={Printer} onClick={handlePrint}>
               Print Bill
             </Button>

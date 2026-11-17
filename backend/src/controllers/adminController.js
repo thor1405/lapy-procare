@@ -377,6 +377,319 @@ export const deleteBooking = async (req, res, next) => {
   }
 };
 
+export const updateBookingDetails = async (req, res, next) => {
+  try {
+    const { ticketId } = req.params;
+    if (!ticketId) {
+      return errorResponse(res, 'Ticket ID is required', 400);
+    }
+
+    const cleanTicketId = ticketId.trim().toUpperCase();
+    const booking = await RepairBooking.findOne({ ticketId: cleanTicketId }).populate('customer');
+
+    if (!booking) {
+      return errorResponse(res, 'Booking ticket not found', 404);
+    }
+
+    const {
+      customer,
+      device,
+      problem,
+      priority,
+      status,
+      statusNote,
+      assignedTechnician,
+      diagnosticFindings,
+      doorstepAddress,
+      billing,
+    } = req.body;
+
+    // 1. Update Customer (User)
+    if (customer && booking.customer) {
+      const customerUser = await User.findById(booking.customer._id);
+      if (customerUser) {
+        if (customer.name && typeof customer.name === 'string') {
+          customerUser.name = customer.name.trim();
+        }
+        if (customer.phone && typeof customer.phone === 'string') {
+          customerUser.phone = customer.phone.trim();
+        }
+        if (customer.email !== undefined && typeof customer.email === 'string') {
+          const emailVal = customer.email.trim();
+          if (emailVal && !emailVal.includes('@lapyprocare.local')) {
+            customerUser.email = emailVal.toLowerCase();
+          }
+        }
+        if (customer.address) {
+          if (!customerUser.address) customerUser.address = {};
+          if (customer.address.street !== undefined) customerUser.address.street = customer.address.street.trim();
+          if (customer.address.city !== undefined) customerUser.address.city = customer.address.city.trim();
+          if (customer.address.postalCode !== undefined) customerUser.address.postalCode = customer.address.postalCode.trim();
+        }
+        await customerUser.save();
+      }
+    }
+
+    // 2. Update Device Info
+    if (device) {
+      if (device.deviceType) booking.device.deviceType = device.deviceType;
+      if (device.brand !== undefined) booking.device.brand = device.brand.trim();
+      if (device.model !== undefined) booking.device.model = device.model.trim();
+      if (device.serialNumber !== undefined) booking.device.serialNumber = device.serialNumber.trim();
+      if (device.passcode !== undefined) booking.device.passcode = device.passcode.trim();
+      if (Array.isArray(device.accessories)) booking.device.accessories = device.accessories;
+    }
+
+    // 3. Update Problem & Diagnostics
+    if (problem) {
+      if (problem.category) booking.problem.category = problem.category;
+      if (problem.description !== undefined) booking.problem.description = problem.description.trim();
+    }
+    if (priority) {
+      booking.priority = priority;
+    }
+    if (diagnosticFindings !== undefined) {
+      booking.diagnosticFindings = diagnosticFindings.trim();
+    }
+    if (doorstepAddress) {
+      if (!booking.doorstepAddress) booking.doorstepAddress = {};
+      if (doorstepAddress.street !== undefined) booking.doorstepAddress.street = doorstepAddress.street.trim();
+      if (doorstepAddress.city !== undefined) booking.doorstepAddress.city = doorstepAddress.city.trim();
+      if (doorstepAddress.postalCode !== undefined) booking.doorstepAddress.postalCode = doorstepAddress.postalCode.trim();
+    }
+
+    // 4. Update Assigned Technician
+    if (assignedTechnician !== undefined) {
+      booking.assignedTechnician = assignedTechnician ? assignedTechnician : null;
+    }
+
+    // 5. Update Status if changed
+    if (status && Object.values(REPAIR_STATUS).includes(status) && status !== booking.status) {
+      const prevStatus = booking.status;
+      booking.status = status;
+      if (statusNote) {
+        booking.customerNotes.push({
+          note: statusNote,
+          author: req.user._id,
+          authorName: req.user.name,
+        });
+      }
+      await RepairStatusHistory.create({
+        booking: booking._id,
+        ticketId: booking.ticketId,
+        fromStatus: prevStatus,
+        toStatus: status,
+        note: statusNote || `Status changed from ${prevStatus} to ${status} via edit`,
+        changedBy: req.user._id,
+        changedByName: req.user.name,
+      });
+      emitStatusUpdate(booking.ticketId, {
+        ticketId: booking.ticketId,
+        status,
+        customerId: booking.customer._id,
+        note: statusNote || '',
+        updatedAt: new Date(),
+      });
+    }
+
+    await booking.save();
+
+    // 6. Update linked Invoice if billing data provided or if customer details changed
+    let invoice = await Invoice.findOne({ ticketId: cleanTicketId });
+    if (billing) {
+      const rawItems = Array.isArray(billing.items) ? billing.items : invoice?.items || [];
+      const cleanItems = rawItems
+        .filter((it) => it && (it.description?.trim() || it.amount > 0 || it.unitPrice > 0))
+        .map((it) => ({
+          description: it.description?.trim() || 'Service Item',
+          itemType: ['Labour', 'Spare Part', 'Service', 'Other'].includes(it.itemType) ? it.itemType : 'Service',
+          quantity: Math.max(1, Number(it.quantity) || 1),
+          unitPrice: Math.max(0, Number(it.unitPrice !== undefined ? it.unitPrice : it.amount) || 0),
+          amount: Math.max(0, Number(it.amount !== undefined ? it.amount : it.unitPrice) || 0),
+        }));
+
+      const labourCharges = Number(billing.labourCharges !== undefined ? billing.labourCharges : invoice?.labourCharges || 0);
+      const sparePartCharges = Number(billing.sparePartCharges !== undefined ? billing.sparePartCharges : invoice?.sparePartCharges || 0);
+      const additionalCharges = Number(billing.additionalCharges !== undefined ? billing.additionalCharges : invoice?.additionalCharges || 0);
+      const discount = Number(billing.discount !== undefined ? billing.discount : invoice?.discount || 0);
+      const taxRate = Number(billing.taxRate !== undefined ? billing.taxRate : 0);
+
+      const subtotal = labourCharges + sparePartCharges + additionalCharges - discount;
+      const taxAmount = Math.round((subtotal * taxRate) / 100);
+      const totalAmount = Math.max(0, subtotal + taxAmount);
+
+      let amountPaid = Number(billing.amountPaid !== undefined ? billing.amountPaid : invoice?.amountPaid || 0);
+      let paymentStatus = billing.paymentStatus || invoice?.paymentStatus || PAYMENT_STATUS.UNPAID;
+
+      if (billing.paymentStatus === PAYMENT_STATUS.PAID && billing.amountPaid === undefined) {
+        amountPaid = totalAmount;
+      } else if (billing.paymentStatus === PAYMENT_STATUS.UNPAID && billing.amountPaid === undefined) {
+        amountPaid = 0;
+      }
+
+      amountPaid = Math.min(totalAmount, Math.max(0, amountPaid));
+      const balanceDue = Math.max(0, totalAmount - amountPaid);
+
+      if (billing.paymentStatus) {
+        paymentStatus = billing.paymentStatus;
+      } else if (amountPaid >= totalAmount && totalAmount > 0) {
+        paymentStatus = PAYMENT_STATUS.PAID;
+      } else if (amountPaid > 0) {
+        paymentStatus = PAYMENT_STATUS.PARTIALLY_PAID;
+      } else {
+        paymentStatus = PAYMENT_STATUS.UNPAID;
+      }
+
+      const validMethods = Object.values(PAYMENT_METHOD);
+      const resolvedMethod = validMethods.includes(billing.paymentMethod)
+        ? billing.paymentMethod
+        : invoice?.paymentMethod || PAYMENT_METHOD.CASH;
+
+      if (invoice) {
+        invoice.items = cleanItems;
+        invoice.labourCharges = labourCharges;
+        invoice.sparePartCharges = sparePartCharges;
+        invoice.additionalCharges = additionalCharges;
+        invoice.discount = discount;
+        invoice.taxRate = taxRate;
+        invoice.taxAmount = taxAmount;
+        invoice.totalAmount = totalAmount;
+        invoice.amountPaid = amountPaid;
+        invoice.balanceDue = balanceDue;
+        invoice.paymentStatus = paymentStatus;
+        invoice.paymentMethod = resolvedMethod;
+        if (billing.paymentReference !== undefined) invoice.paymentReference = billing.paymentReference;
+        if (amountPaid > 0 && !invoice.paidAt) invoice.paidAt = new Date();
+        await invoice.save();
+      } else if (totalAmount > 0) {
+        const invoiceNumber = await generateInvoiceNumber();
+        invoice = await Invoice.create({
+          invoiceNumber,
+          booking: booking._id,
+          ticketId: booking.ticketId,
+          customer: booking.customer._id,
+          billingDetails: {
+            name: customer?.name?.trim() || booking.customer?.name || 'Walk-in Customer',
+            email: customer?.email && !customer.email.includes('@lapyprocare.local') ? customer.email.trim() : (booking.customer?.email && !booking.customer.email.includes('@lapyprocare.local') ? booking.customer.email : ''),
+            phone: customer?.phone?.trim() || booking.customer?.phone || '',
+            address: customer?.address?.street?.trim() || booking.doorstepAddress?.street || '',
+          },
+          items: cleanItems,
+          labourCharges,
+          sparePartCharges,
+          additionalCharges,
+          discount,
+          taxRate,
+          taxAmount,
+          totalAmount,
+          amountPaid,
+          balanceDue,
+          paymentStatus,
+          paymentMethod: resolvedMethod,
+          paymentReference: billing.paymentReference || '',
+          paidAt: amountPaid > 0 ? new Date() : null,
+          createdBy: req.user._id,
+        });
+      }
+    } else if (invoice && customer) {
+      if (customer.name) invoice.billingDetails.name = customer.name.trim();
+      if (customer.phone) invoice.billingDetails.phone = customer.phone.trim();
+      if (customer.email !== undefined && !customer.email.includes('@lapyprocare.local')) {
+        invoice.billingDetails.email = customer.email.trim();
+      }
+      if (customer.address?.street !== undefined) {
+        invoice.billingDetails.address = customer.address.street.trim();
+      }
+      await invoice.save();
+    }
+
+    const updatedBooking = await RepairBooking.findById(booking._id)
+      .populate('customer', 'name email phone address')
+      .populate('assignedTechnician', 'name phone');
+
+    const updatedBookingObj = updatedBooking.toObject();
+    updatedBookingObj.invoice = invoice;
+
+    return successResponse(res, `Ticket ${cleanTicketId} details updated successfully`, {
+      booking: updatedBookingObj,
+      invoice,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateBookingPaymentStatus = async (req, res, next) => {
+  try {
+    const { ticketId } = req.params;
+    if (!ticketId) {
+      return errorResponse(res, 'Ticket ID is required', 400);
+    }
+
+    const cleanTicketId = ticketId.trim().toUpperCase();
+    const invoice = await Invoice.findOne({ ticketId: cleanTicketId });
+    if (!invoice) {
+      return errorResponse(res, 'No invoice found for this ticket. Please prepare a bill first.', 404);
+    }
+
+    const { paymentStatus, amountPaid, paymentMethod, paymentReference } = req.body;
+
+    if (paymentMethod) {
+      const validMethods = Object.values(PAYMENT_METHOD);
+      if (validMethods.includes(paymentMethod)) {
+        invoice.paymentMethod = paymentMethod;
+      }
+    }
+
+    if (paymentReference !== undefined) {
+      invoice.paymentReference = paymentReference;
+    }
+
+    if (paymentStatus === PAYMENT_STATUS.PAID) {
+      invoice.paymentStatus = PAYMENT_STATUS.PAID;
+      invoice.amountPaid = invoice.totalAmount;
+      invoice.balanceDue = 0;
+      invoice.paidAt = new Date();
+    } else if (paymentStatus === PAYMENT_STATUS.UNPAID) {
+      invoice.paymentStatus = PAYMENT_STATUS.UNPAID;
+      invoice.amountPaid = 0;
+      invoice.balanceDue = invoice.totalAmount;
+    } else if (paymentStatus === PAYMENT_STATUS.PARTIALLY_PAID || amountPaid !== undefined) {
+      const paid = Math.min(invoice.totalAmount, Math.max(0, Number(amountPaid) || 0));
+      invoice.amountPaid = paid;
+      invoice.balanceDue = Math.max(0, invoice.totalAmount - paid);
+      if (paid >= invoice.totalAmount && invoice.totalAmount > 0) {
+        invoice.paymentStatus = PAYMENT_STATUS.PAID;
+        invoice.paidAt = new Date();
+      } else if (paid > 0) {
+        invoice.paymentStatus = PAYMENT_STATUS.PARTIALLY_PAID;
+        invoice.paidAt = new Date();
+      } else {
+        invoice.paymentStatus = PAYMENT_STATUS.UNPAID;
+      }
+    }
+
+    await invoice.save();
+
+    // Log payment record if settled in full
+    if (invoice.paymentStatus === PAYMENT_STATUS.PAID && invoice.totalAmount > 0) {
+      await Payment.create({
+        invoice: invoice._id,
+        customer: invoice.customer,
+        amount: invoice.totalAmount,
+        method: invoice.paymentMethod,
+        status: PAYMENT_STATUS.PAID,
+        transactionId: invoice.paymentReference || `PAY-${Date.now()}`,
+        recordedBy: req.user._id,
+      });
+    }
+
+    return successResponse(res, `Payment status updated to ${invoice.paymentStatus}`, { invoice });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ==========================================
 // 2b. CREATE OFFLINE / WALK-IN REPAIR TICKET
 // ==========================================

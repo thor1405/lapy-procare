@@ -6,6 +6,8 @@ import {
   assignTechnician,
   addBookingNote,
   createOfflineBooking,
+  updateBookingDetails,
+  updateBookingPaymentStatus,
   deleteBooking,
   createQuotation,
   getAllQuotations,
@@ -36,7 +38,9 @@ router.get('/dashboard', getDashboardStats);
 
 // Bookings
 router.get('/bookings', getAllBookings);
+router.put('/bookings/:ticketId', updateBookingDetails);
 router.patch('/bookings/:ticketId/status', updateBookingStatus);
+router.patch('/bookings/:ticketId/payment-status', updateBookingPaymentStatus);
 router.post('/bookings/:ticketId/assign', assignTechnician);
 router.post('/bookings/:ticketId/notes', addBookingNote);
 router.post('/bookings/offline', createOfflineBooking);
