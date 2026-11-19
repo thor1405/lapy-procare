@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { globalLimiter } from './middleware/rateLimiter.js';
+import { sanitizeInput } from './middleware/sanitize.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { errorResponse, successResponse } from './utils/apiResponse.js';
 import { getDBStatus } from './config/db.js';
@@ -33,36 +34,77 @@ const app = express();
 // Enable Trust Proxy for Cloudflare / Nginx Reverse Proxies
 app.set('trust proxy', 1);
 
-// Base Security Headers
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' },
-}));
+// Base Security Headers with Helmet
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+        connectSrc: ["'self'", 'ws:', 'wss:', 'https:'],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    frameguard: { action: 'sameorigin' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    xssFilter: true,
+    hidePoweredBy: true,
+  })
+);
 
 // CORS Configuration
+const clientUrls = (process.env.CLIENT_URL || '')
+  .split(',')
+  .map((u) => u.trim())
+  .filter(Boolean);
+
 const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:5173',
+  ...clientUrls,
   'http://localhost:5173',
   'http://localhost:3000',
+  'http://localhost:3555',
   'http://127.0.0.1:5173',
+  'http://127.0.0.1:3555',
+  'https://lapy.myjoice.com',
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // allow requests with no origin (like mobile apps, curl, postman)
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(null, true); // Dev-friendly fallback
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps, curl, postman, server-to-server)
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      if (process.env.NODE_ENV === 'production') {
+        return callback(new Error(`Blocked by CORS policy: origin ${origin} is not allowed`));
+      }
+      return callback(null, true); // Dev-friendly fallback for local testing
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    maxAge: 86400,
+  })
+);
 
 // Request parsers
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET || 'lapy_procare_session_cookie_signature_secret_9999'));
+
+// Apply NoSQL query injection & prototype pollution protection across all requests
+app.use(sanitizeInput);
 
 // Morgan HTTP request logging
 if (process.env.NODE_ENV !== 'test') {
@@ -72,8 +114,17 @@ if (process.env.NODE_ENV !== 'test') {
 // Global API rate limiting
 app.use('/api', globalLimiter);
 
-// Serve uploads directory
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve uploads directory with strict security headers and sandboxing
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, '../uploads'), {
+    dotfiles: 'ignore',
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+    },
+  })
+);
 
 // Health Check
 app.get('/health', (req, res) => {

@@ -15,6 +15,7 @@ import { generateTicketId, generateQuotationNumber, generateInvoiceNumber } from
 import { emitStatusUpdate } from '../services/socketService.js';
 import { sendStatusUpdateEmail, sendQuotationEmail, sendInvoiceEmail } from '../services/emailService.js';
 import { REPAIR_STATUS, ROLES, PAYMENT_STATUS, PAYMENT_METHOD, QUOTATION_STATUS } from '../config/constants.js';
+import { recordAudit } from '../utils/auditLogger.js';
 
 // ==========================================
 // 1. DASHBOARD ANALYTICS
@@ -370,6 +371,16 @@ export const deleteBooking = async (req, res, next) => {
 
     // 6. Delete the booking itself
     await booking.deleteOne();
+
+    await recordAudit({
+      action: 'BOOKING_DELETED',
+      entity: 'RepairBooking',
+      entityId: cleanTicketId,
+      performedBy: req.user?._id,
+      performedByRole: req.user?.role || 'ADMIN',
+      ipAddress: req.ip || '',
+      details: { ticketId: cleanTicketId, device: booking.device },
+    });
 
     return successResponse(res, `Booking ${cleanTicketId} and all associated records deleted successfully`);
   } catch (error) {

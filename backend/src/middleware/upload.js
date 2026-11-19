@@ -11,24 +11,43 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Strict whitelist of permitted image extensions and corresponding MIME types
+const MIME_TO_EXT = {
+  'image/jpeg': '.jpg',
+  'image/jpg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
+    // Determine safe extension directly from verified MIME type, ignoring client-supplied dangerous extensions
+    const safeExt = MIME_TO_EXT[file.mimetype] || '.jpg';
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `device-${uniqueSuffix}${ext}`);
+    cb(null, `device-${uniqueSuffix}${safeExt}`);
   },
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-  if (allowedMimes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG, and WebP images are allowed.'), false);
+  const allowedMimes = Object.keys(MIME_TO_EXT);
+  const ext = path.extname(file.originalname).toLowerCase();
+  const allowedExts = ['.jpg', '.jpeg', '.png', '.webp'];
+
+  // Check both MIME type and file extension
+  if (!allowedMimes.includes(file.mimetype) || !allowedExts.includes(ext)) {
+    return cb(new Error('Invalid file type. Only JPEG, PNG, and WebP images are allowed.'), false);
   }
+
+  // Prevent double extension attacks (e.g. evil.php.jpg, payload.svg.png)
+  const baseNameWithoutExt = path.basename(file.originalname, ext);
+  if (baseNameWithoutExt.includes('.')) {
+    return cb(new Error('Invalid file name. Double extensions are strictly prohibited.'), false);
+  }
+
+  cb(null, true);
 };
 
 export const upload = multer({

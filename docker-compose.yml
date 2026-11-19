@@ -12,7 +12,7 @@ services:
     container_name: lapy_backend
     restart: unless-stopped
     ports:
-      - "${BACKEND_PORT:-5065}:5001"
+      - "127.0.0.1:${BACKEND_PORT:-5065}:5001"
     environment:
       NODE_ENV: production
       PORT: 5001

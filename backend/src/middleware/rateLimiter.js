@@ -22,6 +22,50 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+export const passwordResetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5, // max 5 requests per hour
+  message: {
+    success: false,
+    message: 'Too many password reset requests. Please wait an hour before requesting again.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export const contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: {
+    success: false,
+    message: 'Too many contact messages sent from this network. Please wait a few minutes.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export const bookingLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: {
+    success: false,
+    message: 'Too many repair bookings submitted. Please wait a few minutes.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: {
+    success: false,
+    message: 'Too many photo uploads requested. Please wait a few minutes.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export const trackingLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 60,

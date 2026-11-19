@@ -55,9 +55,21 @@ const userSchema = new mongoose.Schema(
       state: { type: String, default: 'Karnataka' },
       postalCode: { type: String, default: '575028' },
     },
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+    },
+    lockUntil: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
+
+// Virtual or helper to check if account is locked
+userSchema.methods.isLocked = function () {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+};
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {

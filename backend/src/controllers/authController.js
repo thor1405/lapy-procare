@@ -8,6 +8,7 @@ import { ROLES } from '../config/constants.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
 import { sendPasswordResetEmail } from '../services/emailService.js';
 import { logger } from '../config/logger.js';
+import { recordAudit } from '../utils/auditLogger.js';
 
 const generateTokens = (user) => {
   const payload = {
@@ -20,13 +21,19 @@ const generateTokens = (user) => {
   const accessToken = jwt.sign(
     payload,
     process.env.JWT_ACCESS_SECRET || 'lapy_procare_super_secure_jwt_access_secret_key_2026_xyz987',
-    { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m' }
+    {
+      expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+      algorithm: 'HS256',
+    }
   );
 
   const refreshToken = jwt.sign(
     { id: user._id },
     process.env.JWT_REFRESH_SECRET || 'lapy_procare_super_secure_jwt_refresh_secret_key_2026_abc123',
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+    {
+      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+      algorithm: 'HS256',
+    }
   );
 
   return { accessToken, refreshToken };
@@ -140,10 +147,72 @@ export const login = async (req, res, next) => {
       return errorResponse(res, 'Account has been deactivated. Please contact support.', 403);
     }
 
+    // Check account lockout status
+    if (user.isLocked()) {
+      const minutesRemaining = Math.max(1, Math.ceil((new Date(user.lockUntil).getTime() - Date.now()) / (60 * 1000)));
+      await recordAudit({
+        action: 'LOGIN_BLOCKED_ACCOUNT_LOCKED',
+        entity: 'User',
+        entityId: user._id,
+        performedByRole: user.role,
+        ipAddress: req.ip || '',
+        details: { email: user.email, minutesRemaining },
+      });
+      return errorResponse(
+        res,
+        `Account temporarily locked due to consecutive failed login attempts. Please try again after ${minutesRemaining} minutes or reset your password.`,
+        429
+      );
+    }
+
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+      let lockedNow = false;
+
+      // Lock account after 5 consecutive failed attempts
+      if (user.failedLoginAttempts >= 5) {
+        user.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minute lock
+        lockedNow = true;
+      }
+      await user.save();
+
+      await recordAudit({
+        action: lockedNow ? 'ACCOUNT_LOCKED_FAILED_ATTEMPTS' : 'LOGIN_FAILED',
+        entity: 'User',
+        entityId: user._id,
+        performedByRole: user.role,
+        ipAddress: req.ip || '',
+        details: { email: user.email, attempts: user.failedLoginAttempts },
+      });
+
+      if (lockedNow) {
+        return errorResponse(
+          res,
+          'Account temporarily locked due to 5 consecutive failed login attempts. Please try again after 15 minutes or reset your password.',
+          429
+        );
+      }
+
       return errorResponse(res, 'Invalid credentials', 401);
     }
+
+    // Successful login: reset failed login attempts & lock
+    if (user.failedLoginAttempts > 0 || user.lockUntil) {
+      user.failedLoginAttempts = 0;
+      user.lockUntil = undefined;
+      await user.save();
+    }
+
+    await recordAudit({
+      action: 'LOGIN_SUCCESS',
+      entity: 'User',
+      entityId: user._id,
+      performedBy: user._id,
+      performedByRole: user.role,
+      ipAddress: req.ip || '',
+      details: { email: user.email },
+    });
 
     const { accessToken, refreshToken } = generateTokens(user);
 
@@ -188,7 +257,8 @@ export const refresh = async (req, res, next) => {
 
     const decoded = jwt.verify(
       refreshToken,
-      process.env.JWT_REFRESH_SECRET || 'lapy_procare_super_secure_jwt_refresh_secret_key_2026_abc123'
+      process.env.JWT_REFRESH_SECRET || 'lapy_procare_super_secure_jwt_refresh_secret_key_2026_abc123',
+      { algorithms: ['HS256'] }
     );
 
     const user = await User.findById(decoded.id);
@@ -296,6 +366,15 @@ export const changePassword = async (req, res, next) => {
     // Revoke all prior refresh sessions for security
     await RefreshSession.updateMany({ user: user._id }, { isRevoked: true });
 
+    await recordAudit({
+      action: 'PASSWORD_CHANGED',
+      entity: 'User',
+      entityId: user._id,
+      performedBy: user._id,
+      performedByRole: user.role,
+      ipAddress: req.ip || '',
+    });
+
     return successResponse(res, 'Password changed successfully. Please log in again.');
   } catch (error) {
     next(error);
@@ -311,18 +390,33 @@ export const forgotPassword = async (req, res, next) => {
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      // Don't disclose whether user exists
+      // Don't disclose whether user exists (prevent user enumeration)
       return successResponse(res, 'If that email is registered, a password reset link has been sent.');
     }
 
-    const resetToken = crypto.randomBytes(32).toString('hex');
+    // Generate cryptographic token and store only its SHA-256 hash (OWASP recommendation)
+    const rawResetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawResetToken).digest('hex');
+
+    // Invalidate existing unused tokens for this user
+    await PasswordResetToken.updateMany({ user: user._id, isUsed: false }, { isUsed: true });
+
     await PasswordResetToken.create({
       user: user._id,
-      token: resetToken,
+      token: hashedToken,
       expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
     });
 
-    await sendPasswordResetEmail(user, resetToken);
+    await sendPasswordResetEmail(user, rawResetToken);
+
+    await recordAudit({
+      action: 'PASSWORD_RESET_REQUESTED',
+      entity: 'User',
+      entityId: user._id,
+      performedByRole: user.role,
+      ipAddress: req.ip || '',
+      details: { email: user.email },
+    });
 
     return successResponse(res, 'If that email is registered, a password reset link has been sent.');
   } catch (error) {
@@ -342,8 +436,10 @@ export const resetPassword = async (req, res, next) => {
       return errorResponse(res, 'Password must be at least 6 characters', 400);
     }
 
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    // Check hashed token, or fallback to raw token for backward compatibility
     const resetDoc = await PasswordResetToken.findOne({
-      token,
+      $or: [{ token: hashedToken }, { token }],
       isUsed: false,
       expiresAt: { $gt: new Date() },
     });
@@ -358,6 +454,9 @@ export const resetPassword = async (req, res, next) => {
     }
 
     user.password = newPassword;
+    // Reset failed attempts if any
+    user.failedLoginAttempts = 0;
+    user.lockUntil = undefined;
     await user.save();
 
     resetDoc.isUsed = true;
@@ -365,6 +464,15 @@ export const resetPassword = async (req, res, next) => {
 
     // Invalidate sessions
     await RefreshSession.updateMany({ user: user._id }, { isRevoked: true });
+
+    await recordAudit({
+      action: 'PASSWORD_RESET_COMPLETED',
+      entity: 'User',
+      entityId: user._id,
+      performedBy: user._id,
+      performedByRole: user.role,
+      ipAddress: req.ip || '',
+    });
 
     return successResponse(res, 'Password reset successfully. You can now log in.');
   } catch (error) {

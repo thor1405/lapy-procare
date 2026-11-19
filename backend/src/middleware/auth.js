@@ -18,10 +18,11 @@ export const authenticate = async (req, res, next) => {
       return errorResponse(res, 'Authentication required. Please log in.', 401);
     }
 
-    // Verify token
+    // Verify token with explicit algorithm constraint to prevent algorithm confusion attacks
     const decoded = jwt.verify(
       token,
-      process.env.JWT_ACCESS_SECRET || 'lapy_procare_super_secure_jwt_access_secret_key_2026_xyz987'
+      process.env.JWT_ACCESS_SECRET || 'lapy_procare_super_secure_jwt_access_secret_key_2026_xyz987',
+      { algorithms: ['HS256'] }
     );
 
     // Fetch user

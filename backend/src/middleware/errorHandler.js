@@ -14,9 +14,9 @@ export const errorHandler = (err, req, res, next) => {
     return errorResponse(res, 'Validation failed', 400, formattedErrors);
   }
 
-  // Mongoose CastError (invalid ObjectId)
+  // Mongoose CastError (invalid ObjectId or identifier format)
   if (err.name === 'CastError') {
-    return errorResponse(res, `Resource not found with id ${err.value}`, 404);
+    return errorResponse(res, 'Resource not found with the provided identifier.', 404);
   }
 
   // Mongoose Duplicate Key Error
