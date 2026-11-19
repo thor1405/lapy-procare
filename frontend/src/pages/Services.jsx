@@ -317,13 +317,13 @@ export const Services = () => {
               </Button>
             </Link>
             <a
-              href="https://wa.me/919606668315?text=Hi%20Lapy%20Procare%2C%20I%20would%20like%20to%20book%20Home%20Service%20at%20my%20address%20in%20Mangaluru."
+              href="https://wa.me/917666104889?text=Hi%20Lapy%20Procare%2C%20I%20would%20like%20to%20book%20Home%20Service%20at%20my%20address%20in%20Mangaluru."
               target="_blank"
               rel="noreferrer"
               className="flex-1 lg:flex-initial"
             >
               <Button variant="outline" size="md" icon={MessageCircle} className="w-full border-teal-300 text-teal-800 hover:bg-teal-50">
-                WhatsApp: 9606668315
+                WhatsApp: +91 7666104889
               </Button>
             </a>
           </div>

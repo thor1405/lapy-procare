@@ -119,10 +119,9 @@ export const Contact = () => {
                 <MessageCircle className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[#111827] font-semibold block mb-0.5">WhatsApp Support:</span>
-                  <a href="https://wa.me/919606668315" target="_blank" rel="noreferrer" className="text-teal-700 font-mono font-medium hover:underline">
-                    +91 9606668315
+                  <a href="https://wa.me/917666104889" target="_blank" rel="noreferrer" className="text-teal-700 font-mono font-medium hover:underline">
+                    +91 7666104889
                   </a>
-                  <span className="text-[#64748B] text-[11px] block">Secondary WA: +91 7666104889</span>
                 </div>
               </div>
 

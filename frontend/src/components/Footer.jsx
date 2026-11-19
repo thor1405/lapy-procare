@@ -117,8 +117,8 @@ export const Footer = () => {
               </li>
               <li className="flex items-center gap-2.5">
                 <span className="w-4 h-4 flex items-center justify-center font-bold text-teal-600 text-xs">WA</span>
-                <a href="https://wa.me/919606668315" target="_blank" rel="noreferrer" className="text-teal-700 hover:text-teal-900 transition-colors font-mono font-medium">
-                  +91 9606668315
+                <a href="https://wa.me/917666104889" target="_blank" rel="noreferrer" className="text-teal-700 hover:text-teal-900 transition-colors font-mono font-medium">
+                  +91 7666104889
                 </a>
               </li>
               <li className="flex items-center gap-2.5">

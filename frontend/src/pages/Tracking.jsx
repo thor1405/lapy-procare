@@ -138,8 +138,8 @@ export const Tracking = () => {
           <p className="text-xs text-rose-700 max-w-md mx-auto mb-4">{errorMsg}</p>
           <p className="text-xs text-[#64748B]">
             Need help? WhatsApp our Vamanjoor desk at{' '}
-            <a href="https://wa.me/919606668315" className="text-teal-700 font-semibold underline">
-              +91 9606668315
+            <a href="https://wa.me/917666104889" className="text-teal-700 font-semibold underline">
+              +91 7666104889
             </a>{' '}
             or call{' '}
             <a href="tel:+917666104889" className="text-indigo-600 font-semibold underline">

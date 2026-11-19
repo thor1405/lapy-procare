@@ -3,7 +3,7 @@ import { MessageCircle, X, ChevronRight, Laptop, Smartphone, Gamepad2, Home, Pho
 
 export const WhatsAppFloating = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const primaryWhatsApp = '919606668315';
+  const primaryWhatsApp = '917666104889';
   const secondaryPhone = '+917666104889';
 
   const sendWhatsApp = (customText) => {
@@ -97,7 +97,7 @@ export const WhatsAppFloating = () => {
             <span className="flex items-center gap-1 font-mono">
               <PhoneCall className="w-3 h-3 text-indigo-600" /> +91 7666104889
             </span>
-            <span className="font-semibold text-teal-700">WA: +91 9606668315</span>
+            <span className="font-semibold text-teal-700">WA: +91 7666104889</span>
           </div>
         </div>
       )}

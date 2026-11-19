@@ -278,13 +278,13 @@ export const Home = () => {
               </Link>
               <span className="text-slate-300 hidden sm:inline">•</span>
               <a
-                href="https://wa.me/919606668315?text=Hi%20Lapy%20Procare%2C%20I%20need%20repair%20services."
+                href="https://wa.me/917666104889?text=Hi%20Lapy%20Procare%2C%20I%20need%20repair%20services."
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1.5 text-teal-700 hover:text-teal-900 font-semibold transition-colors"
               >
                 <MessageCircle className="w-4 h-4 text-teal-600" />
-                <span>WhatsApp: +91 9606668315</span>
+                <span>WhatsApp: +91 7666104889</span>
               </a>
               <span className="text-slate-300 hidden sm:inline">•</span>
               <a
@@ -700,12 +700,12 @@ export const Home = () => {
                   </Button>
                 </Link>
                 <a
-                  href="https://wa.me/919606668315?text=Hi%20Lapy%20Procare%2C%20I%20would%20like%20to%20request%20Home%20Service%20at%20my%20address%20in%20Mangaluru."
+                  href="https://wa.me/917666104889?text=Hi%20Lapy%20Procare%2C%20I%20would%20like%20to%20request%20Home%20Service%20at%20my%20address%20in%20Mangaluru."
                   target="_blank"
                   rel="noreferrer"
                 >
                   <Button variant="secondary" size="lg" icon={MessageCircle}>
-                    WhatsApp: 9606668315
+                    WhatsApp: +91 7666104889
                   </Button>
                 </a>
               </div>
@@ -973,7 +973,7 @@ export const Home = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <MessageCircle className="w-4 h-4 text-teal-600 shrink-0" />
-                  <span>WhatsApp Support: +91 9606668315 / +91 7666104889</span>
+                  <span>WhatsApp Support: +91 7666104889</span>
                 </div>
               </div>
 
